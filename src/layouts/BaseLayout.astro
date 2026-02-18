@@ -1,0 +1,50 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Personal site of Andrew Rich — hacker, veteran, IRONMAN, friend to cats.' } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="canonical" href={canonicalURL} />
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+    <title>{title} — Project Insomnia</title>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="/" class="site-name">Project Insomnia</a>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/now/">Now</a></li>
+          <li><a href="/projects/">Projects</a></li>
+          <li><a href="/about/">About</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer>
+      <p>
+        &copy; {new Date().getFullYear()} Andrew Rich &mdash; Spokane, WA
+      </p>
+    </footer>
+  </body>
+</html>

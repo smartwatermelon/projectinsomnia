@@ -1,0 +1,48 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Projects">
+  <h1>Projects</h1>
+
+  <div class="project">
+    <h2><a href="https://apps.apple.com/app/kebab" target="_blank" rel="noopener noreferrer">Kebab</a></h2>
+    <p class="project-meta">iOS &amp; Android &mdash; Night Owl Studio, LLC</p>
+    <p>
+      Donation tracker and fair-market-value calculator for charitable giving.
+      Fills the gap left by Intuit's discontinued ItsDeductible. Privacy-first,
+      local data, no ads.
+    </p>
+  </div>
+
+  <div class="project">
+    <h2>crazylarry.space</h2>
+    <p class="project-meta">Web</p>
+    <p>
+      A thing that exists.
+    </p>
+  </div>
+</BaseLayout>
+
+<style>
+  .project {
+    margin-bottom: 2.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .project:last-child {
+    border-bottom: none;
+  }
+
+  .project h2 {
+    margin-top: 0;
+    margin-bottom: 0.25rem;
+  }
+
+  .project-meta {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    margin-bottom: 0.75rem;
+  }
+</style>
