@@ -1,17 +1,53 @@
 ---
+import { getCollection } from 'astro:content';
+import { slugFromId } from '../lib/slugFromId';
+import BaseLayout from '../layouts/BaseLayout.astro';
 
+const posts = (await getCollection('blog'))
+  .filter(p => !p.data.draft)
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 5);
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<BaseLayout title="Home">
+  <section class="intro">
+    <h1>Project Insomnia</h1>
+    <p>
+      Andrew Rich. Hacker, engineer, voice actor, Army vet, nonmammaltarian,
+      IRONMAN, friend to cats. He/Him. Doesn't speak for employer.
+    </p>
+    <p>Based in Spokane, WA.</p>
+  </section>
+
+  <section class="recent-posts">
+    <h2>Recent Posts</h2>
+    <ul class="post-list">
+      {posts.map(post => {
+        const slug = slugFromId(post.id);
+        return (
+          <li>
+            <a href={`/blog/${slug}/`}>{post.data.title}</a>
+            <div class="post-meta">
+              <time datetime={post.data.date.toISOString()}>
+                {post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
+              </time>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+    <p><a href="/blog/">All posts →</a></p>
+  </section>
+</BaseLayout>
+
+<style>
+  .intro {
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .intro h1 { margin-bottom: 1rem; }
+
+  .recent-posts h2 { margin-top: 0; }
+</style>

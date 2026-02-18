@@ -1,0 +1,42 @@
+---
+import { getCollection } from 'astro:content';
+import { slugFromId } from '../../../lib/slugFromId';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const posts = (await getCollection('elections'))
+  .filter(p => !p.data.draft)
+  .sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
+---
+
+<BaseLayout title="Elections">
+  <h1>Elections</h1>
+  <p class="series-desc">
+    Ballot choices and election night notes, 2014–2024.
+  </p>
+
+  <nav class="section-nav">
+    <a href="/blog/">Blog</a>
+    <a href="/blog/ouatrevisit/">OUaT Revisit</a>
+    <a href="/blog/elections/" class="active">Elections</a>
+  </nav>
+
+  <ul class="post-list">
+    {posts.map(post => (
+      <li>
+        <a href={`/blog/elections/${slugFromId(post.id)}/`}>{post.data.title}</a>
+        <div class="post-meta">
+          <time datetime={post.data.date.toISOString()}>
+            {post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
+          </time>
+        </div>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
+
+<style>
+  .series-desc {
+    color: var(--color-muted);
+    margin-bottom: 2rem;
+  }
+</style>

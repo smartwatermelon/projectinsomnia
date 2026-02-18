@@ -1,0 +1,95 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  date: Date;
+  description?: string;
+  tags?: string[];
+  mediumUrl?: string;
+  collection: 'blog' | 'ouatrevisit' | 'elections';
+}
+
+const { title, date, description, tags = [], mediumUrl, collection } = Astro.props;
+
+const dateStr = date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+
+const backLinks: Record<string, { href: string; label: string }> = {
+  blog: { href: '/blog/', label: '← Blog' },
+  ouatrevisit: { href: '/blog/ouatrevisit/', label: '← Once Upon a Time Revisit' },
+  elections: { href: '/blog/elections/', label: '← Elections' },
+};
+
+const back = backLinks[collection];
+---
+
+<BaseLayout title={title} description={description}>
+  <article>
+    <header class="post-header">
+      <a href={back.href} class="back-link">{back.label}</a>
+      <h1>{title}</h1>
+      <div class="post-meta">
+        <time datetime={date.toISOString()}>{dateStr}</time>
+        {tags.filter(t => !['blog', 'ouatrevisit', 'elections'].includes(t)).map(tag => (
+          <span class="tag">{tag}</span>
+        ))}
+      </div>
+      {mediumUrl && (
+        <p class="medium-note">
+          Originally published on <a href={mediumUrl} rel="noopener noreferrer" target="_blank">Medium</a>.
+        </p>
+      )}
+    </header>
+
+    <div class="prose">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .post-header {
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .back-link {
+    display: inline-block;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    text-decoration: none;
+    margin-bottom: 1rem;
+  }
+
+  .back-link:hover { color: var(--color-accent); }
+
+  h1 { margin-bottom: 0.75rem; }
+
+  .post-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+  }
+
+  .medium-note {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+  }
+
+  .prose { line-height: 1.8; }
+
+  .prose :global(h2:first-child),
+  .prose :global(h3:first-child) {
+    margin-top: 0;
+  }
+</style>
