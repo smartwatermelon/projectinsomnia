@@ -31,8 +31,8 @@ let activity: GitHubActivity | null = null;
 try {
   const store = getStore('now-feeds');
   activity = await store.getJSON('github-activity') as GitHubActivity | null;
-} catch {
-  // Blob doesn't exist yet — first deploy before function has run
+} catch (e) {
+  console.error('[now] Blob read failed:', e instanceof Error ? e.message : String(e));
 }
 
 // --- Tiered window filter ---
