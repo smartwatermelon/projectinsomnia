@@ -16,7 +16,7 @@ interface PushEvent {
   created_at: string;
   payload: {
     commits: Commit[];
-    ref: string;
+    ref: string | null;
   };
 }
 
@@ -76,8 +76,8 @@ function relativeTime(dateStr: string): string {
   return 'just now';
 }
 
-function branch(ref: string): string {
-  return ref.replace('refs/heads/', '');
+function branch(ref: string | null): string {
+  return ref ? ref.replace('refs/heads/', '') : '';
 }
 
 function truncate(s: string, n = 80): string {
