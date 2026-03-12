@@ -7,19 +7,40 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   <div class="project">
     <h2><a href="https://apps.apple.com/app/kebab" target="_blank" rel="noopener noreferrer">Kebab</a></h2>
-    <p class="project-meta">iOS &amp; Android &mdash; Night Owl Studio, LLC</p>
+    <p class="project-meta">iOS &amp; Android &mdash; Night Owl Studio, LLC &mdash; Launched December 2025</p>
     <p>
       Donation tracker and fair-market-value calculator for charitable giving.
-      Fills the gap left by Intuit's discontinued ItsDeductible. Privacy-first,
-      local data, no ads.
+      Fills the gap left by Intuit's discontinued ItsDeductible. Uses AI and
+      live marketplace data for valuations, with barcode scanning and photo
+      recognition. Privacy-first: all data stays on your device, no ads, no accounts.
     </p>
   </div>
 
   <div class="project">
-    <h2>crazylarry.space</h2>
+    <h2>Yesteryear <span class="badge">Coming soon</span></h2>
+    <p class="project-meta">iOS &mdash; Night Owl Studio, LLC</p>
+    <p>
+      A memory app that surfaces what you were doing on this day in past years.
+      Replaces Timehop. Pulls from your own data sources — posts, photos, workouts —
+      and keeps everything local.
+    </p>
+  </div>
+
+  <div class="project">
+    <h2><a href="https://crazylarry.space" target="_blank" rel="noopener noreferrer">Crazy Larry's Used Spaceships</a></h2>
     <p class="project-meta">Web</p>
     <p>
-      A thing that exists.
+      A thing that exists. crazylarry.space.
+    </p>
+  </div>
+
+  <div class="project">
+    <h2>Freelance</h2>
+    <p class="project-meta">Night Owl Studio, LLC</p>
+    <p>
+      Résumé writing and editing, website builds and migrations.
+      If you need something built or written, reach out:
+      <a href="mailto:andrew@nightowlstudio.us">andrew@nightowlstudio.us</a>.
     </p>
   </div>
 </BaseLayout>
@@ -44,5 +65,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     font-size: 0.85rem;
     color: var(--color-muted);
     margin-bottom: 0.75rem;
+  }
+
+  .badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    padding: 0.15em 0.5em;
+    color: var(--color-muted);
+    vertical-align: middle;
+    margin-left: 0.5rem;
   }
 </style>
