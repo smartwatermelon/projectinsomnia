@@ -30,7 +30,7 @@ let activity: GitHubActivity | null = null;
 
 try {
   const store = getStore('now-feeds');
-  activity = await store.getJSON('github-activity') as GitHubActivity | null;
+  activity = await store.get('github-activity', { type: 'json' }) as GitHubActivity | null;
 } catch (e) {
   console.error('[now] Blob read failed:', e instanceof Error ? e.message : String(e));
 }
