@@ -194,7 +194,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         const img = document.createElement('img');
         img.src = post.imageUrl;
-        img.alt = post.caption.slice(0, 100);
+        img.alt = (post.caption ?? '').slice(0, 100);
         img.className = 'instagram-thumb';
         img.loading = 'lazy';
 

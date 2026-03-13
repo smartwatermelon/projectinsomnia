@@ -55,21 +55,28 @@ export default async function handler(req: Request): Promise<Response> {
     return new Response("Invalid URLs", { status: 400 });
   }
 
-  const store = getStore(BLOB_STORE);
-  const existing = (await store.get(BLOB_KEY, {
-    type: "json",
-  })) as InstagramData | null;
+  try {
+    const store = getStore(BLOB_STORE);
+    const existing = (await store.get(BLOB_KEY, {
+      type: "json",
+    })) as InstagramData | null;
 
-  const posts = [post, ...(existing?.posts ?? [])].slice(0, MAX_POSTS);
+    const posts = [post, ...(existing?.posts ?? [])].slice(0, MAX_POSTS);
 
-  await store.setJSON(BLOB_KEY, {
-    lastUpdated: new Date().toISOString(),
-    posts,
-  } satisfies InstagramData);
+    await store.setJSON(BLOB_KEY, {
+      lastUpdated: new Date().toISOString(),
+      posts,
+    } satisfies InstagramData);
 
-  console.log(
-    `instagram-webhook: stored post ${post.postUrl} (${posts.length} total)`
-  );
+    console.log(
+      `instagram-webhook: stored post ${post.postUrl} (${posts.length} total)`
+    );
+  } catch (e) {
+    console.error(
+      `instagram-webhook: blob store error: ${e instanceof Error ? e.message : String(e)}`
+    );
+    return new Response("Storage error", { status: 503 });
+  }
 
   return new Response("OK", { status: 200 });
 }
