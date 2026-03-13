@@ -13,6 +13,7 @@ export default async function handler(): Promise<Response> {
     );
 
     const items = (feed.items ?? [])
+      .filter((item) => !item.title?.startsWith(`${GITHUB_USERNAME} deleted`))
       .slice(0, MAX_ITEMS)
       .map((item) => ({
         title: (item.title ?? "").replace(`${GITHUB_USERNAME} `, ""),
