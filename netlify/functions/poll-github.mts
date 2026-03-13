@@ -22,7 +22,7 @@ export default async function handler(): Promise<void> {
   };
 
   const response = await fetch(
-    `https://api.github.com/users/${GITHUB_USERNAME}/events/public?per_page=100`,
+    `https://api.github.com/users/${GITHUB_USERNAME}/events?per_page=100`,
     { headers }
   );
 
