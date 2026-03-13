@@ -5,49 +5,67 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 <BaseLayout title="Now">
   <h1>Now</h1>
 
-  <section class="feed-section">
-    <h2 class="feed-heading">GitHub</h2>
+  <div class="now-grid">
+    <div class="now-left">
+      <section class="feed-section">
+        <h2 class="feed-heading">GitHub</h2>
 
-    <div class="contribution-graph">
-      <img
-        src="https://ghchart.rshah.org/4338ca/smartwatermelon"
-        alt="GitHub contribution graph"
-        class="contribution-img"
-        width="722"
-        height="112"
-      />
+        <div class="contribution-graph">
+          <img
+            src="https://ghchart.rshah.org/4338ca/smartwatermelon"
+            alt="GitHub contribution graph"
+            class="contribution-img"
+            width="722"
+            height="112"
+          />
+        </div>
+
+        <details open class="activity-details">
+          <summary class="activity-summary">Recent activity</summary>
+          <div id="github-feed">
+            <p class="muted">Loading…</p>
+          </div>
+        </details>
+
+        <p class="profile-link">
+          <a href="https://github.com/smartwatermelon" target="_blank" rel="noopener noreferrer">
+            View full GitHub profile →
+          </a>
+        </p>
+      </section>
+
+      <section class="feed-section">
+        <h2 class="feed-heading">Strava</h2>
+
+        <details open class="activity-details">
+          <summary class="activity-summary">Recent activities</summary>
+          <div id="strava-feed">
+            <p class="muted">Loading…</p>
+          </div>
+        </details>
+
+        <p class="profile-link">
+          <a href="https://www.strava.com/athletes/133350" target="_blank" rel="noopener noreferrer">
+            View Strava profile →
+          </a>
+        </p>
+      </section>
     </div>
 
-    <details open class="activity-details">
-      <summary class="activity-summary">Recent activity</summary>
-      <div id="github-feed">
-        <p class="muted">Loading…</p>
-      </div>
-    </details>
-
-    <p class="profile-link">
-      <a href="https://github.com/smartwatermelon" target="_blank" rel="noopener noreferrer">
-        View full GitHub profile →
-      </a>
-    </p>
-  </section>
-
-  <section class="feed-section">
-    <h2 class="feed-heading">Strava</h2>
-
-    <details open class="activity-details">
-      <summary class="activity-summary">Recent activities</summary>
-      <div id="strava-feed">
-        <p class="muted">Loading…</p>
-      </div>
-    </details>
-
-    <p class="profile-link">
-      <a href="https://www.strava.com/athletes/133350" target="_blank" rel="noopener noreferrer">
-        View Strava profile →
-      </a>
-    </p>
-  </section>
+    <div class="now-right">
+      <section class="feed-section">
+        <h2 class="feed-heading">Instagram</h2>
+        <div id="instagram-feed">
+          <p class="muted">Loading…</p>
+        </div>
+        <p class="profile-link">
+          <a href="https://www.instagram.com/smartwatermelon/" target="_blank" rel="noopener noreferrer">
+            View Instagram profile →
+          </a>
+        </p>
+      </section>
+    </div>
+  </div>
 </BaseLayout>
 
 <script>
@@ -152,9 +170,58 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       showMessage(el, 'Activity feed unavailable.');
     }
   })();
+
+  // --- Instagram feed ---
+  (async () => {
+    const el = document.getElementById('instagram-feed')!;
+    try {
+      const res = await timedFetch('/api/instagram-feed');
+      if (!res.ok) throw new Error(`${res.status}`);
+      const { posts } = await res.json() as {
+        posts: Array<{ imageUrl: string; caption: string; postUrl: string; timestamp: string }>;
+      };
+      if (!posts?.length) { showMessage(el, 'No recent posts.'); return; }
+
+      const grid = document.createElement('div');
+      grid.className = 'instagram-grid';
+
+      for (const post of posts) {
+        const a = document.createElement('a');
+        a.href = post.postUrl;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.className = 'instagram-thumb-link';
+
+        const img = document.createElement('img');
+        img.src = post.imageUrl;
+        img.alt = post.caption.slice(0, 100);
+        img.className = 'instagram-thumb';
+        img.loading = 'lazy';
+
+        a.appendChild(img);
+        grid.appendChild(a);
+      }
+      el.replaceChildren(grid);
+    } catch {
+      showMessage(el, 'Feed unavailable.');
+    }
+  })();
 </script>
 
 <style>
+  .now-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  @media (max-width: 640px) {
+    .now-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
   .feed-section {
     margin-bottom: 3rem;
   }
@@ -258,6 +325,31 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     white-space: nowrap;
     flex-shrink: 0;
     margin-left: auto;
+  }
+
+  :global(.instagram-grid) {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  :global(.instagram-thumb-link) {
+    display: block;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  :global(.instagram-thumb) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: opacity 0.2s ease;
+  }
+
+  :global(.instagram-thumb:hover) {
+    opacity: 0.85;
   }
 
   .profile-link {
