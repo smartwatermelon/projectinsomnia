@@ -22,6 +22,11 @@ export default async function handler(req: Request): Promise<Response> {
     return new Response("Method not allowed", { status: 405 });
   }
 
+  if (!process.env.INSTAGRAM_WEBHOOK_SECRET) {
+    console.error("instagram-webhook: INSTAGRAM_WEBHOOK_SECRET is not set");
+    return new Response("Service misconfigured", { status: 503 });
+  }
+
   const auth = req.headers.get("authorization");
   const secret = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
   if (!secret || secret !== process.env.INSTAGRAM_WEBHOOK_SECRET) {
