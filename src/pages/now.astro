@@ -25,21 +25,32 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </div>
     </details>
 
-    <p class="github-profile-link">
-      <a
-        href="https://github.com/smartwatermelon"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
+    <p class="profile-link">
+      <a href="https://github.com/smartwatermelon" target="_blank" rel="noopener noreferrer">
         View full GitHub profile →
+      </a>
+    </p>
+  </section>
+
+  <section class="feed-section">
+    <h2 class="feed-heading">Strava</h2>
+
+    <details open class="activity-details">
+      <summary class="activity-summary">Recent activities</summary>
+      <div id="strava-feed">
+        <p class="muted">Loading…</p>
+      </div>
+    </details>
+
+    <p class="profile-link">
+      <a href="https://www.strava.com/athletes/133350" target="_blank" rel="noopener noreferrer">
+        View Strava profile →
       </a>
     </p>
   </section>
 </BaseLayout>
 
 <script>
-  const feedEl = document.getElementById('github-feed')!;
-
   function relativeTime(dateStr: string): string {
     const diff = Date.now() - new Date(dateStr).getTime();
     const minutes = Math.floor(diff / 60_000);
@@ -51,32 +62,32 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     return 'just now';
   }
 
-  function showMessage(text: string): void {
+  function showMessage(el: HTMLElement, text: string): void {
     const p = document.createElement('p');
     p.className = 'muted';
     p.textContent = text;
-    feedEl.replaceChildren(p);
+    el.replaceChildren(p);
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000);
+  function timedFetch(url: string): Promise<Response> {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 5000);
+    return fetch(url, { signal: controller.signal });
+  }
 
-  fetch('/api/github-feed', { signal: controller.signal })
-    .then((res) => {
+  // --- GitHub feed ---
+  (async () => {
+    const el = document.getElementById('github-feed')!;
+    try {
+      const res = await timedFetch('/api/github-feed');
       if (!res.ok) throw new Error(`${res.status}`);
-      return res.json();
-    })
-    .then(({ items }: { items: Array<{ title: string; link: string; published: string }> }) => {
-      clearTimeout(timeout);
-
-      if (!items?.length) {
-        showMessage('No recent public activity.');
-        return;
-      }
+      const { items } = await res.json() as {
+        items: Array<{ title: string; link: string; published: string }>;
+      };
+      if (!items?.length) { showMessage(el, 'No recent public activity.'); return; }
 
       const ul = document.createElement('ul');
       ul.className = 'event-list';
-
       for (const item of items) {
         const li = document.createElement('li');
         li.className = 'event';
@@ -95,13 +106,52 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         li.append(a, span);
         ul.appendChild(li);
       }
+      el.replaceChildren(ul);
+    } catch {
+      showMessage(el, 'Activity feed unavailable.');
+    }
+  })();
 
-      feedEl.replaceChildren(ul);
-    })
-    .catch(() => {
-      clearTimeout(timeout);
-      showMessage('Activity feed unavailable.');
-    });
+  // --- Strava feed ---
+  (async () => {
+    const el = document.getElementById('strava-feed')!;
+    try {
+      const res = await timedFetch('/api/strava-feed');
+      if (!res.ok) throw new Error(`${res.status}`);
+      const { items } = await res.json() as {
+        items: Array<{ name: string; type: string; startDate: string; link: string }>;
+      };
+      if (!items?.length) { showMessage(el, 'No recent activities.'); return; }
+
+      const ul = document.createElement('ul');
+      ul.className = 'event-list';
+      for (const item of items) {
+        const li = document.createElement('li');
+        li.className = 'event';
+
+        const a = document.createElement('a');
+        a.href = item.link;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.className = 'event-title';
+        a.textContent = item.name;
+
+        const type = document.createElement('span');
+        type.className = 'event-type';
+        type.textContent = item.type.replace(/([A-Z])/g, ' $1').trim();
+
+        const time = document.createElement('span');
+        time.className = 'event-time';
+        time.textContent = relativeTime(item.startDate);
+
+        li.append(a, type, time);
+        ul.appendChild(li);
+      }
+      el.replaceChildren(ul);
+    } catch {
+      showMessage(el, 'Activity feed unavailable.');
+    }
+  })();
 </script>
 
 <style>
@@ -170,8 +220,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   .event {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
-    gap: 1rem;
+    gap: 0.75rem;
     padding: 0.6rem 0;
     border-bottom: 1px solid var(--color-border);
   }
@@ -195,24 +244,32 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     color: var(--color-accent);
   }
 
-  .event-time {
+  .event-type {
     font-size: 0.8rem;
     color: var(--color-muted);
     white-space: nowrap;
     flex-shrink: 0;
   }
 
-  .github-profile-link {
+  .event-time {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .profile-link {
     margin-top: 0.75rem;
     font-size: 0.9rem;
   }
 
-  .github-profile-link a {
+  .profile-link a {
     color: var(--color-accent);
     text-decoration: none;
   }
 
-  .github-profile-link a:hover {
+  .profile-link a:hover {
     text-decoration: underline;
   }
 
