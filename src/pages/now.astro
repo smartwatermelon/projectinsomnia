@@ -211,13 +211,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     transform: rotate(-90deg);
   }
 
-  .event-list {
+  /* JS-generated elements don't receive Astro's scoped attribute, so these must be global */
+  :global(.event-list) {
     list-style: none;
     padding: 0;
     margin: 0 0 0.75rem;
   }
 
-  .event {
+  :global(.event) {
     display: flex;
     align-items: baseline;
     gap: 1.5rem;
@@ -225,11 +226,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     border-bottom: 1px solid var(--color-border);
   }
 
-  .event:last-child {
+  :global(.event:last-child) {
     border-bottom: none;
   }
 
-  .event-title {
+  :global(.event-title) {
     font-size: 0.9rem;
     color: var(--color-text);
     text-decoration: none;
@@ -240,18 +241,18 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     text-overflow: ellipsis;
   }
 
-  .event-title:hover {
+  :global(.event-title:hover) {
     color: var(--color-accent);
   }
 
-  .event-type {
+  :global(.event-type) {
     font-size: 0.8rem;
     color: var(--color-muted);
     white-space: nowrap;
     flex-shrink: 0;
   }
 
-  .event-time {
+  :global(.event-time) {
     font-size: 0.8rem;
     color: var(--color-muted);
     white-space: nowrap;
@@ -273,7 +274,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     text-decoration: underline;
   }
 
-  .muted {
+  :global(.muted) {
     color: var(--color-muted);
     padding: 0.75rem 0;
     margin: 0;
