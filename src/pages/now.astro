@@ -45,7 +45,9 @@ if (activity && activity.events.length > 0) {
 
   const filter = (cutoff: number) =>
     activity!.events.filter(
-      (e) => new Date(e.created_at).getTime() > now - cutoff
+      (e) =>
+        new Date(e.created_at).getTime() > now - cutoff &&
+        (e.payload.commits?.length ?? 0) > 0
     );
 
   const h24 = filter(ms(24));
