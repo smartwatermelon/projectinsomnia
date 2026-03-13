@@ -3,28 +3,7 @@ export const prerender = false;
 
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getStore } from '@netlify/blobs';
-
-interface Commit {
-  sha: string;
-  message: string;
-  author: { name: string };
-}
-
-interface PushEvent {
-  id: string;
-  repo: { name: string };
-  created_at: string;
-  payload: {
-    size: number;
-    commits?: Commit[];
-    ref: string | null;
-  };
-}
-
-interface GitHubActivity {
-  lastFetched: string;
-  events: PushEvent[];
-}
+import type { ActivityItem, GitHubActivity } from '../../netlify/functions/poll-github.mts';
 
 // --- Read from Blob cache ---
 let activity: GitHubActivity | null = null;
@@ -34,35 +13,6 @@ try {
   activity = await store.get('github-activity', { type: 'json' }) as GitHubActivity | null;
 } catch (e) {
   console.error('[now] Blob read failed:', e instanceof Error ? e.message : String(e));
-}
-
-// --- Tiered window filter ---
-let windowLabel = '';
-let displayEvents: PushEvent[] = [];
-
-if (activity && activity.events.length > 0) {
-  const now = Date.now();
-  const ms = (h: number) => h * 60 * 60 * 1000;
-
-  const filter = (cutoff: number) =>
-    activity!.events.filter(
-      (e) => new Date(e.created_at).getTime() > now - cutoff
-    );
-
-  const h24 = filter(ms(24));
-  const d7  = filter(ms(24 * 7));
-  const d30 = filter(ms(24 * 30));
-
-  if (h24.length > 0) {
-    displayEvents = h24;
-    windowLabel = 'last 24 hours';
-  } else if (d7.length > 0) {
-    displayEvents = d7;
-    windowLabel = 'last 7 days';
-  } else if (d30.length > 0) {
-    displayEvents = d30;
-    windowLabel = 'last 30 days';
-  }
 }
 
 // --- Helpers ---
@@ -77,25 +27,10 @@ function relativeTime(dateStr: string): string {
   return 'just now';
 }
 
-function branch(ref: string | null): string {
-  return ref ? ref.replace('refs/heads/', '') : '';
-}
-
-function truncate(s: string, n = 80): string {
-  return s.length > n ? s.slice(0, n) + '…' : s;
-}
-
-function commitDetail(event: PushEvent): string {
-  const count = event.payload.commits?.length ?? 0;
-  const size  = event.payload.size ?? 0;
-  const n     = count > 0 ? count : size;
-  if (n === 0) return '';
-  return `${n} commit${n !== 1 ? 's' : ''}`;
-}
-
 const lastFetched = activity?.lastFetched
   ? relativeTime(activity.lastFetched)
   : null;
+const items: ActivityItem[] = activity?.items ?? [];
 ---
 
 <BaseLayout title="Now">
@@ -114,55 +49,49 @@ const lastFetched = activity?.lastFetched
       />
     </div>
 
-    <h3 class="feed-subheading">
-      Recent pushes
-      {windowLabel && <span class="window-label">— {windowLabel}</span>}
-    </h3>
+    <details open class="activity-details">
+      <summary class="activity-summary">Recent activity</summary>
 
-    {!activity && (
-      <p class="muted">Activity feed initializing — check back soon.</p>
-    )}
+      {!activity && (
+        <p class="muted">Activity feed initializing — check back soon.</p>
+      )}
 
-    {activity && displayEvents.length === 0 && (
-      <p class="muted">No recent public activity.</p>
-    )}
+      {activity && items.length === 0 && (
+        <p class="muted">No recent public activity.</p>
+      )}
 
-    {displayEvents.length > 0 && (
-      <ul class="event-list">
-        {displayEvents.map((event) => {
-          const detail = commitDetail(event);
-          const firstMsg = event.payload.commits?.[0]?.message;
-          return (
+      {items.length > 0 && (
+        <ul class="event-list">
+          {items.map((item) => (
             <li class="event">
-              <div class="event-meta">
-                <a
-                  href={`https://github.com/${event.repo.name}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="repo-name"
-                >
-                  {event.repo.name}
-                </a>
-                <span class="branch-name">{branch(event.payload.ref)}</span>
-                <span class="event-time">{relativeTime(event.created_at)}</span>
-              </div>
-              {detail && (
-                <div class="commit-summary">
-                  {detail}
-                  {firstMsg && (
-                    <> — <span class="commit-message">{truncate(firstMsg)}</span></>
-                  )}
-                </div>
-              )}
+              <a
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="event-title"
+              >
+                {item.title}
+              </a>
+              <span class="event-time">{relativeTime(item.published)}</span>
             </li>
-          );
-        })}
-      </ul>
-    )}
+          ))}
+        </ul>
+      )}
 
-    {lastFetched && (
-      <p class="updated">Updated {lastFetched}</p>
-    )}
+      {lastFetched && (
+        <p class="updated">Updated {lastFetched}</p>
+      )}
+    </details>
+
+    <p class="github-profile-link">
+      <a
+        href="https://github.com/smartwatermelon"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        View full GitHub profile →
+      </a>
+    </p>
   </section>
 </BaseLayout>
 
@@ -189,26 +118,52 @@ const lastFetched = activity?.lastFetched
     display: block;
   }
 
-  .feed-subheading {
-    font-size: 1rem;
+  .activity-details {
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 0 1rem;
+  }
+
+  .activity-summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    font-size: 0.95rem;
     font-weight: 600;
-    margin: 0 0 0.75rem;
+    color: var(--color-muted);
+    user-select: none;
+  }
+
+  .activity-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .activity-summary::after {
+    content: '▾';
+    font-size: 1.1em;
+    transition: transform 0.2s ease;
     color: var(--color-muted);
   }
 
-  .window-label {
-    font-weight: 400;
-    color: var(--color-muted);
-    font-size: 0.9em;
+  details:not([open]) .activity-summary::after {
+    transform: rotate(-90deg);
   }
 
   .event-list {
     list-style: none;
     padding: 0;
+    margin: 0 0 0.75rem;
   }
 
   .event {
-    padding: 1rem 0;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 0;
     border-bottom: 1px solid var(--color-border);
   }
 
@@ -216,56 +171,51 @@ const lastFetched = activity?.lastFetched
     border-bottom: none;
   }
 
-  .event-meta {
-    display: flex;
-    align-items: baseline;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-    margin-bottom: 0.25rem;
-  }
-
-  .repo-name {
-    font-weight: 600;
-    font-size: 0.95rem;
+  .event-title {
+    font-size: 0.9rem;
     color: var(--color-text);
     text-decoration: none;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .repo-name:hover {
+  .event-title:hover {
     color: var(--color-accent);
   }
 
-  .branch-name {
-    font-family: var(--font-mono);
+  .event-time {
     font-size: 0.8rem;
     color: var(--color-muted);
-    background: var(--color-surface);
-    padding: 0.1em 0.4em;
-    border-radius: 3px;
-  }
-
-  .event-time {
-    font-size: 0.85rem;
-    color: var(--color-muted);
-    margin-left: auto;
-  }
-
-  .commit-summary {
-    font-size: 0.9rem;
-    color: var(--color-muted);
-  }
-
-  .commit-message {
-    color: var(--color-text);
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .updated {
-    margin-top: 1.5rem;
     font-size: 0.8rem;
     color: var(--color-muted);
+    padding: 0.5rem 0 0.75rem;
+    margin: 0;
+  }
+
+  .github-profile-link {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .github-profile-link a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .github-profile-link a:hover {
+    text-decoration: underline;
   }
 
   .muted {
     color: var(--color-muted);
+    padding: 0.75rem 0;
   }
 </style>

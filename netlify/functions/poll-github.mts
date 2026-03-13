@@ -1,57 +1,53 @@
 import type { Config } from "@netlify/functions";
 import { getStore } from "@netlify/blobs";
+import Parser from "rss-parser";
 
 const GITHUB_USERNAME = "smartwatermelon";
+const ATOM_URL = `https://github.com/${GITHUB_USERNAME}.atom`;
 const BLOB_STORE = "now-feeds";
 const BLOB_KEY = "github-activity";
+const MAX_ITEMS = 10;
+
+export interface ActivityItem {
+  title: string;
+  link: string;
+  published: string;
+}
+
+export interface GitHubActivity {
+  lastFetched: string;
+  items: ActivityItem[];
+}
 
 export default async function handler(): Promise<void> {
-  const token = process.env.GITHUB_TOKEN;
+  const parser = new Parser();
 
-  if (!token) {
-    throw new Error(
-      "GITHUB_TOKEN not set — add it to Netlify environment variables"
-    );
-  }
-
-  const headers: Record<string, string> = {
-    Accept: "application/vnd.github+json",
-    "X-GitHub-Api-Version": "2022-11-28",
-    "User-Agent": "projectinsomnia-now-page",
-    Authorization: `Bearer ${token}`,
-  };
-
-  const response = await fetch(
-    `https://api.github.com/users/${GITHUB_USERNAME}/events?per_page=100`,
-    { headers }
-  );
-
-  if (response.status === 401) {
-    throw new Error(
-      "GitHub API returned 401 — GITHUB_TOKEN may be expired or invalid"
-    );
-  }
-
-  if (!response.ok) {
-    // Transient error: log but soft-fail so stale cache is preserved
+  let feed;
+  try {
+    feed = await parser.parseURL(ATOM_URL);
+  } catch (e) {
     console.error(
-      `GitHub API error: ${response.status} ${response.statusText}`
+      `poll-github: failed to fetch Atom feed: ${e instanceof Error ? e.message : String(e)}`
     );
     return;
   }
 
-  const events = await response.json() as Array<{ type: string }>;
-  const pushEvents = events.filter((e) => e.type === "PushEvent");
+  const items: ActivityItem[] = (feed.items ?? [])
+    .slice(0, MAX_ITEMS)
+    .map((item) => ({
+      title: (item.title ?? "").replace(`${GITHUB_USERNAME} `, ""),
+      link: item.link ?? "",
+      published: item.isoDate ?? item.pubDate ?? new Date().toISOString(),
+    }));
 
   const store = getStore(BLOB_STORE);
-
   await store.setJSON(BLOB_KEY, {
     lastFetched: new Date().toISOString(),
-    events: pushEvents,
-  });
+    items,
+  } satisfies GitHubActivity);
 
   console.log(
-    `poll-github: stored ${pushEvents.length} push events at ${new Date().toISOString()}`
+    `poll-github: stored ${items.length} activity items at ${new Date().toISOString()}`
   );
 }
 
