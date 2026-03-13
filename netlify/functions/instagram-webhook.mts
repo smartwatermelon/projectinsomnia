@@ -33,11 +33,20 @@ export default async function handler(req: Request): Promise<Response> {
     return new Response("Unauthorized", { status: 401 });
   }
 
+  // IFTTT substitutes ingredients directly into JSON templates without escaping,
+  // so captions with quotes/newlines produce malformed JSON. Use form-encoded body instead.
   let post: InstagramPost;
   try {
-    post = (await req.json()) as InstagramPost;
+    const body = await req.text();
+    const params = new URLSearchParams(body);
+    post = {
+      imageUrl: params.get("imageUrl") ?? "",
+      caption: params.get("caption") ?? "",
+      postUrl: params.get("postUrl") ?? "",
+      timestamp: params.get("timestamp") ?? "",
+    };
   } catch {
-    return new Response("Invalid JSON", { status: 400 });
+    return new Response("Invalid body", { status: 400 });
   }
 
   if (!post.imageUrl || !post.postUrl) {
