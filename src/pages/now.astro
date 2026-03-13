@@ -71,8 +71,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   function timedFetch(url: string): Promise<Response> {
     const controller = new AbortController();
-    setTimeout(() => controller.abort(), 5000);
-    return fetch(url, { signal: controller.signal });
+    const id = setTimeout(() => controller.abort(), 5000);
+    return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(id));
   }
 
   // --- GitHub feed ---
