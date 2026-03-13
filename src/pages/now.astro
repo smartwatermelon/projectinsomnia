@@ -1,36 +1,5 @@
 ---
-export const prerender = false;
-
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getStore } from '@netlify/blobs';
-import type { ActivityItem, GitHubActivity } from '../../netlify/functions/poll-github.mts';
-
-// --- Read from Blob cache ---
-let activity: GitHubActivity | null = null;
-
-try {
-  const store = getStore('now-feeds');
-  activity = await store.get('github-activity', { type: 'json' }) as GitHubActivity | null;
-} catch (e) {
-  console.error('[now] Blob read failed:', e instanceof Error ? e.message : String(e));
-}
-
-// --- Helpers ---
-function relativeTime(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const minutes = Math.floor(diff / 60_000);
-  const hours   = Math.floor(minutes / 60);
-  const days    = Math.floor(hours / 24);
-  if (days > 0)    return `${days}d ago`;
-  if (hours > 0)   return `${hours}h ago`;
-  if (minutes > 0) return `${minutes}m ago`;
-  return 'just now';
-}
-
-const lastFetched = activity?.lastFetched
-  ? relativeTime(activity.lastFetched)
-  : null;
-const items: ActivityItem[] = activity?.items ?? [];
 ---
 
 <BaseLayout title="Now">
@@ -51,36 +20,9 @@ const items: ActivityItem[] = activity?.items ?? [];
 
     <details open class="activity-details">
       <summary class="activity-summary">Recent activity</summary>
-
-      {!activity && (
-        <p class="muted">Activity feed initializing — check back soon.</p>
-      )}
-
-      {activity && items.length === 0 && (
-        <p class="muted">No recent public activity.</p>
-      )}
-
-      {items.length > 0 && (
-        <ul class="event-list">
-          {items.map((item) => (
-            <li class="event">
-              <a
-                href={item.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="event-title"
-              >
-                {item.title}
-              </a>
-              <span class="event-time">{relativeTime(item.published)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-
-      {lastFetched && (
-        <p class="updated">Updated {lastFetched}</p>
-      )}
+      <div id="github-feed">
+        <p class="muted">Loading…</p>
+      </div>
     </details>
 
     <p class="github-profile-link">
@@ -94,6 +36,73 @@ const items: ActivityItem[] = activity?.items ?? [];
     </p>
   </section>
 </BaseLayout>
+
+<script>
+  const feedEl = document.getElementById('github-feed')!;
+
+  function relativeTime(dateStr: string): string {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const minutes = Math.floor(diff / 60_000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    if (days > 0) return `${days}d ago`;
+    if (hours > 0) return `${hours}h ago`;
+    if (minutes > 0) return `${minutes}m ago`;
+    return 'just now';
+  }
+
+  function showMessage(text: string): void {
+    const p = document.createElement('p');
+    p.className = 'muted';
+    p.textContent = text;
+    feedEl.replaceChildren(p);
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+
+  fetch('/api/github-feed', { signal: controller.signal })
+    .then((res) => {
+      if (!res.ok) throw new Error(`${res.status}`);
+      return res.json();
+    })
+    .then(({ items }: { items: Array<{ title: string; link: string; published: string }> }) => {
+      clearTimeout(timeout);
+
+      if (!items?.length) {
+        showMessage('No recent public activity.');
+        return;
+      }
+
+      const ul = document.createElement('ul');
+      ul.className = 'event-list';
+
+      for (const item of items) {
+        const li = document.createElement('li');
+        li.className = 'event';
+
+        const a = document.createElement('a');
+        a.href = item.link;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.className = 'event-title';
+        a.textContent = item.title;
+
+        const span = document.createElement('span');
+        span.className = 'event-time';
+        span.textContent = relativeTime(item.published);
+
+        li.append(a, span);
+        ul.appendChild(li);
+      }
+
+      feedEl.replaceChildren(ul);
+    })
+    .catch(() => {
+      clearTimeout(timeout);
+      showMessage('Activity feed unavailable.');
+    });
+</script>
 
 <style>
   .feed-section {
@@ -193,13 +202,6 @@ const items: ActivityItem[] = activity?.items ?? [];
     flex-shrink: 0;
   }
 
-  .updated {
-    font-size: 0.8rem;
-    color: var(--color-muted);
-    padding: 0.5rem 0 0.75rem;
-    margin: 0;
-  }
-
   .github-profile-link {
     margin-top: 0.75rem;
     font-size: 0.9rem;
@@ -217,5 +219,6 @@ const items: ActivityItem[] = activity?.items ?? [];
   .muted {
     color: var(--color-muted);
     padding: 0.75rem 0;
+    margin: 0;
   }
 </style>
