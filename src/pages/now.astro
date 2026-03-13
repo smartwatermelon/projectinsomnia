@@ -15,6 +15,7 @@ interface PushEvent {
   repo: { name: string };
   created_at: string;
   payload: {
+    size: number;
     commits?: Commit[];
     ref: string | null;
   };
@@ -30,9 +31,9 @@ let activity: GitHubActivity | null = null;
 
 try {
   const store = getStore('now-feeds');
-  activity = await store.getJSON('github-activity') as GitHubActivity | null;
-} catch {
-  // Blob doesn't exist yet — first deploy before function has run
+  activity = await store.get('github-activity', { type: 'json' }) as GitHubActivity | null;
+} catch (e) {
+  console.error('[now] Blob read failed:', e instanceof Error ? e.message : String(e));
 }
 
 // --- Tiered window filter ---
@@ -84,6 +85,14 @@ function truncate(s: string, n = 80): string {
   return s.length > n ? s.slice(0, n) + '…' : s;
 }
 
+function commitDetail(event: PushEvent): string {
+  const count = event.payload.commits?.length ?? 0;
+  const size  = event.payload.size ?? 0;
+  const n     = count > 0 ? count : size;
+  if (n === 0) return '';
+  return `${n} commit${n !== 1 ? 's' : ''}`;
+}
+
 const lastFetched = activity?.lastFetched
   ? relativeTime(activity.lastFetched)
   : null;
@@ -93,10 +102,22 @@ const lastFetched = activity?.lastFetched
   <h1>Now</h1>
 
   <section class="feed-section">
-    <h2 class="feed-heading">
-      GitHub
+    <h2 class="feed-heading">GitHub</h2>
+
+    <div class="contribution-graph">
+      <img
+        src="https://ghchart.rshah.org/4338ca/smartwatermelon"
+        alt="GitHub contribution graph"
+        class="contribution-img"
+        width="722"
+        height="112"
+      />
+    </div>
+
+    <h3 class="feed-subheading">
+      Recent pushes
       {windowLabel && <span class="window-label">— {windowLabel}</span>}
-    </h2>
+    </h3>
 
     {!activity && (
       <p class="muted">Activity feed initializing — check back soon.</p>
@@ -108,28 +129,34 @@ const lastFetched = activity?.lastFetched
 
     {displayEvents.length > 0 && (
       <ul class="event-list">
-        {displayEvents.map((event) => (
-          <li class="event">
-            <div class="event-meta">
-              <a
-                href={`https://github.com/${event.repo.name}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="repo-name"
-              >
-                {event.repo.name}
-              </a>
-              <span class="branch-name">{branch(event.payload.ref)}</span>
-              <span class="event-time">{relativeTime(event.created_at)}</span>
-            </div>
-            <div class="commit-summary">
-              {event.payload.commits?.length ?? 0} commit{(event.payload.commits?.length ?? 0) !== 1 ? 's' : ''} —
-              <span class="commit-message">
-                {truncate(event.payload.commits?.[0]?.message ?? '')}
-              </span>
-            </div>
-          </li>
-        ))}
+        {displayEvents.map((event) => {
+          const detail = commitDetail(event);
+          const firstMsg = event.payload.commits?.[0]?.message;
+          return (
+            <li class="event">
+              <div class="event-meta">
+                <a
+                  href={`https://github.com/${event.repo.name}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="repo-name"
+                >
+                  {event.repo.name}
+                </a>
+                <span class="branch-name">{branch(event.payload.ref)}</span>
+                <span class="event-time">{relativeTime(event.created_at)}</span>
+              </div>
+              {detail && (
+                <div class="commit-summary">
+                  {detail}
+                  {firstMsg && (
+                    <> — <span class="commit-message">{truncate(firstMsg)}</span></>
+                  )}
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ul>
     )}
 
@@ -146,6 +173,27 @@ const lastFetched = activity?.lastFetched
 
   .feed-heading {
     margin-bottom: 1rem;
+  }
+
+  .contribution-graph {
+    background: var(--color-surface);
+    border-radius: 4px;
+    overflow: hidden;
+    aspect-ratio: 722 / 112;
+    margin-bottom: 1.5rem;
+  }
+
+  .contribution-img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .feed-subheading {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.75rem;
+    color: var(--color-muted);
   }
 
   .window-label {
