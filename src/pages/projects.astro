@@ -2,82 +2,285 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<BaseLayout title="Projects">
+<BaseLayout title="Projects" description="Apps, client work, and open source repos from Andrew Rich.">
+
   <h1>Projects</h1>
 
-  <div class="project">
-    <h2><a href="https://apps.apple.com/app/kebab" target="_blank" rel="noopener noreferrer">Kebab</a></h2>
-    <p class="project-meta">iOS &amp; Android &mdash; Night Owl Studio, LLC &mdash; Launched December 2025</p>
-    <p>
-      Donation tracker and fair-market-value calculator for charitable giving.
-      Fills the gap left by Intuit's discontinued ItsDeductible. Uses AI and
-      live marketplace data for valuations, with barcode scanning and photo
-      recognition. Privacy-first: all data stays on your device, no ads, no accounts.
-    </p>
+  <div class="projects-grid">
+
+    <!-- LEFT COLUMN: Products & Client Work -->
+    <div class="projects-main">
+
+      <section class="project-group">
+        <h2>Night Owl Studio</h2>
+
+        <div class="project">
+          <h3><a href="https://kebab.tax">Kebab</a> <span class="badge">iOS &amp; Android</span></h3>
+          <p class="project-meta">Night Owl Studio, LLC — Launched December 2025</p>
+          <p>Donation tracker and fair-market-value calculator for charitable giving.
+          Fills the gap left by Intuit's discontinued ItsDeductible. Uses AI and
+          live marketplace data for valuations, with barcode scanning and photo
+          recognition. Privacy-first: all data stays on your device, no ads, no accounts.</p>
+        </div>
+
+        <div class="project">
+          <h3>Yesteryear <span class="badge badge--soon">Coming soon</span></h3>
+          <p class="project-meta">Night Owl Studio, LLC — iOS</p>
+          <p>A memory app that surfaces what you were doing on this day in past years.
+          Replaces Timehop. Pulls from your own data sources — posts, photos, workouts —
+          and keeps everything local.</p>
+        </div>
+
+        <div class="project">
+          <h3><a href="https://crazylarry.space">Crazy Larry's Used Spaceships</a> <span class="badge">Web</span></h3>
+          <p>A thing that exists. <a href="https://crazylarry.space">crazylarry.space</a>.</p>
+        </div>
+      </section>
+
+      <section class="project-group">
+        <h2>Client Work</h2>
+
+        <div class="project">
+          <h3><a href="https://tnjcleaning.com">T&amp;J Cleaning</a> <span class="badge">Web</span></h3>
+          <p class="project-meta">Night Owl Studio, LLC — 2025</p>
+          <p>A Spokane-area residential cleaning service with four years in business and
+          a 4.9-star Thumbtack rating — but no web presence. Built them a clean,
+          fast, single-page site with a contact form and photo gallery, replacing a
+          Thumbtack listing that charged them for every inquiry whether it converted or not.</p>
+        </div>
+
+        <!-- Amelia Boone — uncomment when client is ready to announce
+        <div class="project">
+          <h3>Amelia Boone <span class="badge badge--soon">In progress</span></h3>
+          <p class="project-meta">Night Owl Studio, LLC — 2026</p>
+          <p>Site migration and rebuild for obstacle racing champion and ultrarunner
+          Amelia Boone. Consolidating a WordPress archive (125 posts, 2011–2023) and
+          an active Substack into a single Astro-based site.</p>
+        </div>
+        -->
+
+        <div class="project">
+          <h3>Freelance</h3>
+          <p>Résumé writing and editing, website builds and migrations.
+          <a href="mailto:andrew@nightowlstudio.us">andrew@nightowlstudio.us</a></p>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- RIGHT COLUMN: GitHub Repos -->
+    <div class="projects-repos">
+      <h2>Open Source</h2>
+      <p class="repos-intro">Public repos on <a href="https://github.com/smartwatermelon">GitHub</a>.
+      Mostly tools I built because I needed them.</p>
+
+      <section class="repo-group">
+        <h3>AI &amp; Claude Code</h3>
+        <ul class="repo-list">
+          <li>
+            <a href="https://github.com/smartwatermelon/claude-wrapper">claude-wrapper</a>
+            <p>Secure wrapper for Claude Code CLI: git identity isolation, 1Password
+            secrets injection, multi-org GitHub token routing, and modular pre-launch hooks.</p>
+          </li>
+          <li>
+            <a href="https://github.com/smartwatermelon/claude-config">claude-config</a>
+            <p>My personal Claude Code CLI configuration — hooks, scripts, and
+            the accumulated settings of someone who lives in this tool.</p>
+          </li>
+          <li>
+            <a href="https://github.com/smartwatermelon/agents">agents</a>
+            <p>Intelligent automation and multi-agent orchestration patterns for Claude Code.</p>
+          </li>
+          <li>
+            <a href="https://github.com/smartwatermelon/headroom">headroom</a>
+            <p>A context optimization layer for LLM applications.</p>
+          </li>
+          <li>
+            <a href="https://github.com/smartwatermelon/smartwatermelon-marketplace">smartwatermelon-marketplace</a>
+            <p>A marketplace of Claude Code CLI plugins.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="repo-group">
+        <h3>macOS &amp; Infrastructure</h3>
+        <ul class="repo-list">
+          <li>
+            <a href="https://github.com/smartwatermelon/mac-server-setup">mac-server-setup</a>
+            <p>Automated setup framework for Apple Silicon Mac Minis as home servers:
+            native macOS apps, per-user SMB mounting, security hardening.</p>
+          </li>
+          <li>
+            <a href="https://github.com/smartwatermelon/swift-progress-indicator">swift-progress-indicator</a>
+            <p>Lightweight native macOS progress indicator that reads log files
+            in real time. No special permissions, no UX crimes.</p>
+          </li>
+          <li>
+            <a href="https://github.com/smartwatermelon/archive-resolver">archive-resolver</a>
+            <p>macOS DNS resolver override for archive.today.</p>
+          </li>
+          <li>
+            <a href="https://github.com/smartwatermelon/transmission-filebot">transmission-filebot</a>
+            <p>Automated media processing scripts for Transmission downloads with Plex integration.</p>
+          </li>
+          <li>
+            <a href="https://github.com/smartwatermelon/homebrew-tap">homebrew-tap</a>
+            <p>Homebrew tap for my various CLI and GUI tools.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="repo-group">
+        <h3>Utilities &amp; Miscellany</h3>
+        <ul class="repo-list">
+          <li>
+            <a href="https://github.com/smartwatermelon/github-workflows">github-workflows</a>
+            <p>Reusable GitHub Actions workflows you can import into your own repos.</p>
+          </li>
+          <li>
+            <a href="https://github.com/smartwatermelon/pre-commit-testing">pre-commit-testing</a>
+            <p>Comprehensive test suite for pre-commit hooks: clean files, auto-fixable
+            issues, non-fixable errors across multiple file types.</p>
+          </li>
+          <li>
+            <a href="https://github.com/smartwatermelon/anniversary">anniversary</a>
+            <p>Anniversary activity selector. Archived; no updates needed. Might be
+            useful to someone.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="repo-group">
+        <h3>Interview Projects</h3>
+        <p class="repo-group-note">Complex take-home projects from a 2024 job search.
+        Both companies ended contact without explanation after multiple interview rounds.
+        Leaving these public in case they're useful to anyone in a similar situation.</p>
+        <ul class="repo-list">
+          <li>
+            <a href="https://github.com/smartwatermelon/sailpoint-sre">sailpoint-sre</a>
+            <p>SailPoint SRE take-home project.</p>
+          </li>
+          <li>
+            <a href="https://github.com/smartwatermelon/beam-sre-kata">beam-sre-kata</a>
+            <p>Beam Benefits SRE kata exercise.</p>
+          </li>
+        </ul>
+      </section>
+
+    </div>
   </div>
 
-  <div class="project">
-    <h2>Yesteryear <span class="badge">Coming soon</span></h2>
-    <p class="project-meta">iOS &mdash; Night Owl Studio, LLC</p>
-    <p>
-      A memory app that surfaces what you were doing on this day in past years.
-      Replaces Timehop. Pulls from your own data sources — posts, photos, workouts —
-      and keeps everything local.
-    </p>
-  </div>
-
-  <div class="project">
-    <h2><a href="https://crazylarry.space" target="_blank" rel="noopener noreferrer">Crazy Larry's Used Spaceships</a></h2>
-    <p class="project-meta">Web</p>
-    <p>
-      A thing that exists. crazylarry.space.
-    </p>
-  </div>
-
-  <div class="project">
-    <h2>Freelance</h2>
-    <p class="project-meta">Night Owl Studio, LLC</p>
-    <p>
-      Résumé writing and editing, website builds and migrations.
-      If you need something built or written, reach out:
-      <a href="mailto:andrew@nightowlstudio.us">andrew@nightowlstudio.us</a>.
-    </p>
-  </div>
 </BaseLayout>
 
 <style>
-  .project {
+  .projects-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    align-items: start;
+  }
+
+  @media (max-width: 700px) {
+    .projects-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .project-group,
+  .repo-group {
     margin-bottom: 2.5rem;
-    padding-bottom: 2.5rem;
+  }
+
+  .project-group h2,
+  .projects-repos > h2 {
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
     border-bottom: 1px solid var(--color-border);
   }
 
-  .project:last-child {
-    border-bottom: none;
+  .project {
+    margin-bottom: 2rem;
   }
 
-  .project h2 {
-    margin-top: 0;
-    margin-bottom: 0.25rem;
+  .project h3 {
+    margin: 0 0 0.2rem;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
   }
 
   .project-meta {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: var(--color-muted);
-    margin-bottom: 0.75rem;
+    margin: 0 0 0.5rem;
   }
 
   .badge {
     font-size: 0.7rem;
-    font-weight: 600;
+    font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: 3px;
-    padding: 0.15em 0.5em;
+    padding: 0.1em 0.5em;
     color: var(--color-muted);
     vertical-align: middle;
-    margin-left: 0.5rem;
+  }
+
+  .badge--soon {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  /* Repos column */
+  .repos-intro {
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .repo-group h3 {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--color-muted);
+    margin: 0 0 0.75rem;
+  }
+
+  .repo-group-note {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    font-style: italic;
+    margin-bottom: 0.75rem;
+  }
+
+  .repo-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+  }
+
+  .repo-list li {
+    margin-bottom: 1rem;
+  }
+
+  .repo-list a {
+    font-weight: 500;
+    font-size: 0.9rem;
+    font-family: var(--font-mono);
+  }
+
+  .repo-list p {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    margin: 0.15rem 0 0;
+    line-height: 1.4;
   }
 </style>
