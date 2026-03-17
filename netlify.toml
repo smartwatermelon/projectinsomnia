@@ -5,3 +5,15 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
+
+[[redirects]]
+  from = "https://project-insomnia.com/*"
+  to = "https://projectinsomnia.com/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.project-insomnia.com/*"
+  to = "https://projectinsomnia.com/:splat"
+  status = 301
+  force = true
