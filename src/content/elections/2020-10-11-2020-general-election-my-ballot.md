@@ -12,7 +12,7 @@ My ballot choices for the 2020 General Election.
 
 I live and vote in the City of East Palo Alto, which is in San Mateo County; in the 24th State Assembly District, the 13th State Senate District, and the 14th U.S. Congressional District. I’m listing my ballot choices for these offices, as well as the twelve(!) ballot propositions.
 
-![2020 General Election ballot header](https://cdn-images-1.medium.com/max/800/1*ET4dEZ3eZ4BZjGZxXLxEKQ.png)
+![2020 General Election ballot header](/images/elections/ET4dEZ3eZ4BZjGZxXLxEKQ.png)
 
 I am a registered Democrat and generally progressive in my political and social beliefs. I’ve made my decisions based on information from the Official Voter Information Guide, General Election Sample Ballot, and [Voter’s Edge](https://votersedge.org/en/ca).
 

@@ -10,7 +10,7 @@ mediumUrl: "https://medium.com/@smartwatermelon/2018-election-my-ballot-f1388d6c
 
 My choices, and some commentary, for the 2018 election. State of California / San Mateo County / City of East Palo Alto. I am a registered Democrat and _usually_ vote straight-ticket. But not always.
 
-![Go Vote California banner](https://cdn-images-1.medium.com/max/800/1*6lHWQRDQF6fyvAdkEp4jkA.jpeg)
+![Go Vote California banner](/images/elections/6lHWQRDQF6fyvAdkEp4jkA.jpeg)
 _Go Vote, California!_
 
 I am generally against most ballot measures, because I believe legislating should be done by the Legislature. I’m generally against most bond measures, because as a homeowner, they impact me directly — in the form of “extra” assessments on top of my property taxes — so the measure has to be really good for me to support it.

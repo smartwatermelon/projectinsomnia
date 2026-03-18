@@ -10,7 +10,7 @@ mediumUrl: "https://medium.com/@smartwatermelon/how-to-build-a-great-company-cul
 
 Want to build a great company culture? Here are your four essential components.
 
-![Open source company culture illustration](https://cdn-images-1.medium.com/max/800/1*h1UXF9dPpYN8WQm68MrAgQ.jpeg)
+![Open source company culture illustration](/images/blog/h1UXF9dPpYN8WQm68MrAgQ.jpeg)
 *Flickr user opensourceway [https://flic.kr/p/8S4XtH](https://flic.kr/p/8S4XtH) CC BY-SA 2.0*
 
 1. Tell us what you want us to work on. Be as specific as you reasonably can, given our level and responsibilities. Don't vaguely gesture at, "you know, try to find things to work on that will support our mission," and then chastise us for not finding the thing you were thinking of but didn't tell us.

@@ -14,7 +14,7 @@ Gulp.
 
 So I took a full iTunes backup, and …
 
-![iPhone Reset All Settings confirmation screen](https://cdn-images-1.medium.com/max/800/1*AAZqMABshT1RiMUj24_Sng.jpeg)
+![iPhone Reset All Settings confirmation screen](/images/blog/AAZqMABshT1RiMUj24_Sng.jpeg)
 *ALL of them*
 
 What follows is an incomplete list of everything I had to reconfigure after the iPhone finished resetting and came back up.
