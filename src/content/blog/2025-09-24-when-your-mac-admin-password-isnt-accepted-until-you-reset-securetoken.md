@@ -14,7 +14,7 @@ On macOS, there’s nothing more frustrating than typing your known admin passwo
 
 Here’s what I saw — this password dialog from Safari, demanding my credentials, and persistently rejecting them:
 
-![Safari is trying to allow Apple Events to run JavaScript on web pages. Enter the password for the user “TILSIT Operator” to allow this.](https://cdn-images-1.medium.com/max/800/1*N8HbaS0UP-EoGaGM-V7e0w.png)
+![Safari is trying to allow Apple Events to run JavaScript on web pages. Enter the password for the user “TILSIT Operator” to allow this.](/images/blog/N8HbaS0UP-EoGaGM-V7e0w.png)
 *I AM entering the password!*
 
 Does that look familiar? It might, if you’ve struggled with advanced macOS settings, particularly after system upgrades, account migrations, or changes to device management.
@@ -64,7 +64,7 @@ Unfortunately, there are quite a large number of blandly informative yet complet
 
 If your admin account can’t authenticate password dialogs, and another admin account works, check SecureToken first. Fixing it is usually just a command away. You’ll save hours of head-scratching, blind alleys, and cursing the wisdom of the ancients.
 
-![Relevant xkcd comic about finding an unanswered forum post from years ago](https://cdn-images-1.medium.com/max/800/1*J3Ygm52dcu75LQkQ6McuEw.png)
+![Relevant xkcd comic about finding an unanswered forum post from years ago](/images/blog/J3Ygm52dcu75LQkQ6McuEw.png)
 *[https://xkcd.com/979/](https://xkcd.com/979/)*
 
 Endnote: I solved this problem during a thorough rubber-ducking session with Perplexity AI, which also aided in drafting the article. I don’t miss working in an office, but it’s sometimes nice to have a coworker to bounce ideas off.

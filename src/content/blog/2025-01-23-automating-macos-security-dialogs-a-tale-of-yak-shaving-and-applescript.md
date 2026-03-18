@@ -14,7 +14,7 @@ mediumUrl: "https://medium.com/@smartwatermelon/automating-macos-security-dialog
 2. Create AppleScript service to handle dialogs
 3. Set up LaunchAgent to run automatically
 
-![macOS security dialog asking to allow nginx incoming network connections](https://cdn-images-1.medium.com/max/800/1*P7h9fuubFNEVL7-R6M726A.png)
+![macOS security dialog asking to allow nginx incoming network connections](/images/blog/P7h9fuubFNEVL7-R6M726A.png)
 *The annoying dialog in question. I don’t know why it’s tinted pink.*
 
 ### The Problem

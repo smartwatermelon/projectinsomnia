@@ -8,7 +8,7 @@ mediumUrl: "https://medium.com/@smartwatermelon/syncing-garmin-920xt-triathlon-a
 
 ### Syncing Garmin Forerunner 920XT Triathlon activities to Strava and Runkeeper
 
-![Garmin Forerunner 920XT triathlon watch](https://cdn-images-1.medium.com/max/800/1*CXet_jzxO0WXdBx_4FEylg.png)
+![Garmin Forerunner 920XT triathlon watch](/images/blog/CXet_jzxO0WXdBx_4FEylg.png)
 *Garmin Forerunner 920XT (image courtesy Garmin)*
 
 The [Garmin Forerunner 920XT](https://buy.garmin.com/en-US/US/p/137024) is a terrific triathlon watch, and I really like the tri mode — where you just hit the *Lap* key in between segments (T1, run start, T2, bike start) and when you’re done, it creates a single “Triathlon” activity in [Garmin Connect](https://connect.garmin.com/en-US/).

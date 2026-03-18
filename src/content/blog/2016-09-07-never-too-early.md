@@ -10,7 +10,7 @@ mediumUrl: "https://medium.com/@smartwatermelon/never-too-early-661f8168adcf"
 
 …to start thinking about my athletic goals for 2017.
 
-![Psychedelic marathon start line with runners](https://cdn-images-1.medium.com/max/800/1*z43H0qk3mJLY0xOZra6nRw.jpeg)
+![Psychedelic marathon start line with runners](/images/blog/z43H0qk3mJLY0xOZra6nRw.jpeg)
 *“Psychedelic Marathon Start” by [brewbooks](https://www.flickr.com/photos/brewbooks/) on Flickr*
 
 1. Miles in one event: I want to “run my age”, which will be 47. So 47 miles in one day… sounds like a perfect goal for Brazen Racing’s annual Dirty Dozen twelve-hour trail run. In 2016 I achieved my first “ultra” distance — 50K (actually 33.7 miles) at this event, over around nine hours. Running for twelve hours (including rest breaks) will be difficult, but I think I can do it.

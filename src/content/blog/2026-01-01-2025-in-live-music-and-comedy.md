@@ -14,7 +14,7 @@ In 2025, I attended eight live performances — five music and three comedy�
 
 **January 1; Spokane Comedy Club, Spokane, WA, USA**
 
-![Spokane Comedy Club marquee](https://cdn-images-1.medium.com/max/800/1*5FEN6Ke9qthUAxSSYCwYKg.jpeg)
+![Spokane Comedy Club marquee](/images/blog/5FEN6Ke9qthUAxSSYCwYKg.jpeg)
 *Spokane Comedy Club marquee / Andrew Rich*
 
 What better way to start the new year than with Kevin Smith holding court at a comedy club? #SpokaneAmendment
@@ -23,7 +23,7 @@ What better way to start the new year than with Kevin Smith holding court at a c
 
 **April 8; First Interstate Center for the Arts, Spokane, WA, USA**
 
-![The cast of Hamilton taking their bow](https://cdn-images-1.medium.com/max/800/1*TqCdpCu6Ss-s-jvnZcqJyg.jpeg)
+![The cast of Hamilton taking their bow](/images/blog/TqCdpCu6Ss-s-jvnZcqJyg.jpeg)
 *The cast of Hamilton takes their bow at the conclusion of the show / Andrew Rich*
 
 Our second time seeing Hamilton; the first was in San Francisco in 2019. Unfortunately, they haven’t fixed the ending yet.
@@ -32,12 +32,12 @@ Our second time seeing Hamilton; the first was in San Francisco in 2019. Unfortu
 
 **April 25; Climate Pledge Arena, Seattle, WA, USA**
 
-![Floor seats for Kylie Minogue at Climate Pledge Arena](https://cdn-images-1.medium.com/max/800/1*RYwLHZXKpGblFjzyfzHXFw.jpeg)
+![Floor seats for Kylie Minogue at Climate Pledge Arena](/images/blog/RYwLHZXKpGblFjzyfzHXFw.jpeg)
 *Pretty great floor seats for Kylie Minogue at Climate Pledge Arena / Andrew Rich*
 
 Climate Pledge Arena has become our go-to for major shows — it’s a 48-minute flight from Spokane, a 30-minute light rail ride to downtown, and a fun monorail ride to the arena. We’ll fly out in the afternoon, have dinner, see the show, stay overnight, and fly home the next morning. We’d previously seen Madonna there in 2024, and we’d be back in August for Lady Gaga.
 
-![Kylie Minogue performing at Climate Pledge Arena](https://cdn-images-1.medium.com/max/800/1*EYM5FekrSh4h69x5HDE71g.jpeg)
+![Kylie Minogue performing at Climate Pledge Arena](/images/blog/EYM5FekrSh4h69x5HDE71g.jpeg)
 *Kylie Minogue performing at Climate Pledge Arena / Andrew Rich*
 
 Kylie is a legend, of course, and I’m so glad we got to see her live. The Tension tour highlighted her current album and was also a fun retrospective of her career.
@@ -46,58 +46,58 @@ Kylie is a legend, of course, and I’m so glad we got to see her live. The Tens
 
 **May 4; Knitting Factory, Spokane, WA, USA**
 
-![Silversun Pickups at Knitting Factory Spokane](https://cdn-images-1.medium.com/max/800/1*cfr8uQnY_vUrDk6xQljVxg.jpeg)
+![Silversun Pickups at Knitting Factory Spokane](/images/blog/cfr8uQnY_vUrDk6xQljVxg.jpeg)
 *Silversun Pickups at Knitting Factory, Spokane / Andrew Rich*
 
 Silversun Pickups were back at the Knitting Factory for the second year in a row. They mentioned how much they love playing in Spokane and that they always try to include it on their tours. The set featured a couple of new songs, and Brian Aubert jammed a bit with opener Rocket, which was extra fun.
 
-![Rocket featuring Brian Aubert of Silversun Pickups](https://cdn-images-1.medium.com/max/800/1*-YPVb3ycqbsGi2eyG1ePdA.jpeg)
+![Rocket featuring Brian Aubert of Silversun Pickups](/images/blog/-YPVb3ycqbsGi2eyG1ePdA.jpeg)
 *Rocket, featuring Silversun Pickups’ Brian Aubert / Andrew Rich*
 
 ### Lady Gaga
 
 **August 6; Climate Pledge Arena, Seattle, WA, USA**
 
-![Lady Gaga preparing for Mayhem](https://cdn-images-1.medium.com/max/800/1*iYeFSa8mFmnYD-JnQuvVMw.jpeg)
+![Lady Gaga preparing for Mayhem](/images/blog/iYeFSa8mFmnYD-JnQuvVMw.jpeg)
 *Lady Gaga preparing for Mayhem / Andrew Rich*
 
 Back to Climate Pledge for our second Seattle trip of the year.
 
-![Lady Gaga performing on stage](https://cdn-images-1.medium.com/max/800/1*Th59kiWytJPlCkgsh9YTrQ.jpeg)
+![Lady Gaga performing on stage](/images/blog/Th59kiWytJPlCkgsh9YTrQ.jpeg)
 *Lady GagaThe whole show was pretty much like this, if not more so / Andrew Rich*
 
-![Lady Gaga in a vintage Depeche Mode tee during encore](https://cdn-images-1.medium.com/max/800/1*z2YX5CK4F0F6jkDEUhNjQw.jpeg)
+![Lady Gaga in a vintage Depeche Mode tee during encore](/images/blog/z2YX5CK4F0F6jkDEUhNjQw.jpeg)
 *Lady Gaga came out for the encore in a vintage Depeche Mode tee / Andrew Rich*
 
 ### Garbage (w/Starcrawler)
 
 **October 18; Knitting Factory, Spokane, WA, USA**
 
-![Shirley Manson of Garbage at the Knitting Factory Spokane](https://cdn-images-1.medium.com/max/800/1*dGZGibInsBK7cyiRe5vPGw.jpeg)
+![Shirley Manson of Garbage at the Knitting Factory Spokane](/images/blog/dGZGibInsBK7cyiRe5vPGw.jpeg)
 *Shirley Manson of Garbage at the Knitting Factory, Spokane / Andrew Rich*
 
 This was my third time seeing Garbage — after Oakland in 2018 and Auburn, Washington in 2023. Sadly, Shirley Manson indicated this would likely be their last North American tour, citing increased costs that have become prohibitive for anyone not at a mega-label scale. If that’s true, I’m glad we caught them.
 
-![Garbage setlist from the Knitting Factory](https://cdn-images-1.medium.com/max/800/1*GQLF1PT4idAHolitqugfYA.jpeg)
+![Garbage setlist from the Knitting Factory](/images/blog/GQLF1PT4idAHolitqugfYA.jpeg)
 *Garbage’s setlist from the Knitting Factory / Andrew Rich*
 
 ### Iliza Shlesinger
 
 **November 21; Arlene Schnitzer Concert Hall, Portland, OR, USA**
 
-![The Arlene Schnitzer theater in Portland Oregon](https://cdn-images-1.medium.com/max/800/1*5Ni2I3WJc3HSULxiqY41qw.jpeg)
+![The Arlene Schnitzer theater in Portland Oregon](/images/blog/5Ni2I3WJc3HSULxiqY41qw.jpeg)
 *The Arlene Schnitzer theater, Portland, Oregon / Andrew Rich*
 
 A one-night trip to Portland for Iliza at the Schnitzer, a gorgeous old restored theater. She was great live, but the material was almost entirely drawn from her recent Prime special — so it was a little anticlimactic to know all the jokes before she told them.
 
-![Iliza Shlesinger at the Arlene Schnitzer theater](https://cdn-images-1.medium.com/max/800/1*IfHq9da0xqNjV_jTJGPMAg.jpeg)
+![Iliza Shlesinger at the Arlene Schnitzer theater](/images/blog/IfHq9da0xqNjV_jTJGPMAg.jpeg)
 *Iliza Shlesinger at the Arlene Schnitzer theater, Portland, Oregon / Andrew Rich*
 
 ### Paula Poundstone
 
 **December 5; Bing Crosby Theater, Spokane, WA, USA**
 
-![Spokane Bing Crosby theater](https://cdn-images-1.medium.com/max/800/1*BrinJFCFI5-l-b1PHoBSWQ.jpeg)
+![Spokane Bing Crosby theater](/images/blog/BrinJFCFI5-l-b1PHoBSWQ.jpeg)
 *Spokane’s beautiful Bing Crosby theater / Andrew Rich*
 
 Another beautiful restored theater, this one right here in Spokane. We’ve been fans of Paula since her early Comedy Central and HBO specials, and it was a real treat to see her live.

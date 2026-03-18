@@ -10,7 +10,7 @@ mediumUrl: "https://medium.com/@smartwatermelon/how-to-remove-unwanted-items-fro
 
 There’s a lot of conflicting and outdated information on this topic. With my typical combination of hyperfocus, trial-and-error, and a lot of swearing, I’ve worked out the current procedure _(December 2023, PMS version 1.40.0.7775, macOS, YMMV)_.
 
-![Person frustrated at a computer screen](https://cdn-images-1.medium.com/max/800/1*yzzDK3H9FP9r5YI_ZsbbBw.jpeg)
+![Person frustrated at a computer screen](/images/blog/yzzDK3H9FP9r5YI_ZsbbBw.jpeg)
 _Photo by [Sigmund](https://unsplash.com/@sigmund?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash) on [Unsplash](https://unsplash.com/photos/woman-in-black-shirt-sitting-beside-black-flat-screen-computer-monitor-Im_cQ6hQo10?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash)_
 
 #### Why do I need this?
@@ -58,5 +58,5 @@ Sources:
 -   [https://support.plex.tv/articles/201539237-backing-up-plex-media-server-data/](https://support.plex.tv/articles/201539237-backing-up-plex-media-server-data/)
 ```
 
-![Cat sitting next to a laptop computer](https://cdn-images-1.medium.com/max/800/1*QR34Iq_tJAZOZ-rZCpgiWA.jpeg)
+![Cat sitting next to a laptop computer](/images/blog/QR34Iq_tJAZOZ-rZCpgiWA.jpeg)
 _Photo by [Dillon Kydd](https://unsplash.com/@kyddvisuals?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash) on [Unsplash](https://unsplash.com/photos/a-cat-sitting-on-top-of-a-desk-next-to-a-laptop-computer-9XrdePyTewE?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash)_

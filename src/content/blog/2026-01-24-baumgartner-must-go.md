@@ -12,7 +12,7 @@ mediumUrl: "https://medium.com/@smartwatermelon/baumgartner-must-go-ca74f0f7ec3a
 
 _His statements. His votes. The pattern._
 
-![Official portrait of U.S. Representative Michael Baumgartner](https://cdn-images-1.medium.com/max/800/1*AW0prVNZk_ftplZVWDkA3Q.jpeg)
+![Official portrait of U.S. Representative Michael Baumgartner](/images/blog/AW0prVNZk_ftplZVWDkA3Q.jpeg)
 _Photo credit: Official portrait, Office of U.S. Representative Michael Baumgartner. Via baumgartner.house.gov._
 
 **Renee Good (January 7, 2026)**

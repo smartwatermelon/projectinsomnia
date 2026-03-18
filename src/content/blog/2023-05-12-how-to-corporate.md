@@ -18,5 +18,5 @@ mediumUrl: "https://medium.com/@smartwatermelon/how-to-corporate-852e64e07afe"
 - one more joke for good measure
 - end on a high note and tell them you look forward to seeing them again at the next all-hands, except for the ones who get cut before then, ha-ha!
 
-![Empty corporate conference room with chairs](https://cdn-images-1.medium.com/max/800/1*iVvCNI08x3kSCWdG9M9L3A.jpeg)
+![Empty corporate conference room with chairs](/images/blog/iVvCNI08x3kSCWdG9M9L3A.jpeg)
 *Photo by [Pawel Chu](https://unsplash.com/@pawell?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText) on [Unsplash](https://unsplash.com/photos/ULh0i2txBCY?utm_source=unsplash&utm_medium=referral&utm_content=creditCopyText)*
