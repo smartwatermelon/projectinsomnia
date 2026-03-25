@@ -172,7 +172,7 @@ In practice: Karabiner rules are event-driven. They evaluate conditions when a p
 
 ### What About the Open Source Core?
 
-Synergy's upstream open source project is [Deskflow](https://github.com/deskflow/deskflow). The protocol is [fully documented](https://deskflow.github.io/deskflow/protocol_reference.html). The relevant messages are `kMsgCEnter` and `kMsgCLeave` — server-to-client commands. The server decides to issue them based on internal event processing (hotkeys, edge transitions). There is no inbound "switch to screen X" message type in the protocol. The server's decision is entirely internal to `synergy-core`. I've [filed a feature request](TODO) to add action endpoints (specifically a `POST /v1/switch` or equivalent) to the REST API — if Deskflow already exposes settings over HTTP, exposing a screen-switch command feels like a natural extension.
+Synergy's upstream open source project is [Deskflow](https://github.com/deskflow/deskflow). The protocol is [fully documented](https://deskflow.github.io/deskflow/protocol_reference.html). The relevant messages are `kMsgCEnter` and `kMsgCLeave` — server-to-client commands. The server decides to issue them based on internal event processing (hotkeys, edge transitions). There is no inbound "switch to screen X" message type in the protocol. The server's decision is entirely internal to `synergy-core`. I've [filed a feature request](https://github.com/deskflow/deskflow/issues/9606) to add action endpoints (specifically a `POST /v1/switch` or equivalent) to the REST API — if Deskflow already exposes settings over HTTP, exposing a screen-switch command feels like a natural extension.
 
 ### The Definitive Architecture
 
