@@ -123,7 +123,10 @@ With the edge transition working, I wanted a fallback: keyboard shortcuts to jum
 
 After confirming with Synergy support that the config syntax was correct, I tried the same shortcut from the MacBook Air's built-in keyboard. It worked immediately.
 
-The reason is subtle: macOS grants its own hardware a privileged input path that bypasses the HID permission sandbox. External USB keyboards are subject to the Input Monitoring restriction. Synergy wasn't listed under System Settings → Privacy & Security → Input Monitoring, so hotkeys from the Keychron were silently dropped — no error in Synergy's logs, no indication anything was wrong. The fix: **add Synergy to Input Monitoring and restart**. Hotkeys now work from the Keychron too.
+The reason is subtle: macOS grants its own hardware a privileged input path that bypasses the HID permission sandbox. External USB keyboards are subject to the Input Monitoring restriction. Synergy wasn't listed under System Settings → Privacy & Security → Input Monitoring, so hotkeys from the Keychron were silently dropped — no error in Synergy's logs, no indication anything was wrong. The fix: **add Synergy to Input Monitoring** and restart Synergy. Hotkeys now work from the Keychron too.
+
+![macOS Privacy & Security settings showing Synergy enabled under Input Monitoring](/images/blog/macOS-input-monitoring-synergy.png)
+*Synergy needs Input Monitoring permission for external keyboard hotkeys to work.*
 
 ---
 
