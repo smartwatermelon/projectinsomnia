@@ -18,13 +18,14 @@ interface InstagramData {
 }
 
 /** Extract shortcode from an Instagram post URL.
- *  Handles both classic and username-prefixed formats:
+ *  Handles instagram.com, instagr.am, and username-prefixed formats:
  *    https://www.instagram.com/p/ABC123/
  *    https://www.instagram.com/username/p/ABC123/
+ *    https://instagr.am/p/ABC123/
  */
 function extractShortcode(postUrl: string): string | null {
   const match = postUrl.match(
-    /instagram\.com\/(?:[\w.]+\/)?(?:p|reel)\/([A-Za-z0-9_-]+)/
+    /(?:instagram\.com|instagr\.am)\/(?:[\w.]+\/)?(?:p|reel)\/([A-Za-z0-9_-]+)/
   );
   return match?.[1] ?? null;
 }
