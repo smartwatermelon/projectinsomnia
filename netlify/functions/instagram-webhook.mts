@@ -17,9 +17,15 @@ interface InstagramData {
   posts: InstagramPost[];
 }
 
-/** Extract shortcode from an Instagram post URL like https://www.instagram.com/p/ABC123/ */
+/** Extract shortcode from an Instagram post URL.
+ *  Handles both classic and username-prefixed formats:
+ *    https://www.instagram.com/p/ABC123/
+ *    https://www.instagram.com/username/p/ABC123/
+ */
 function extractShortcode(postUrl: string): string | null {
-  const match = postUrl.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
+  const match = postUrl.match(
+    /instagram\.com\/(?:[\w.]+\/)?(?:p|reel)\/([A-Za-z0-9_-]+)/
+  );
   return match?.[1] ?? null;
 }
 
@@ -65,6 +71,9 @@ export default async function handler(req: Request): Promise<Response> {
 
   const shortcode = extractShortcode(post.postUrl);
   if (!shortcode) {
+    console.error(
+      `instagram-webhook: could not extract shortcode from postUrl: ${post.postUrl}`
+    );
     return new Response("Could not extract shortcode from postUrl", {
       status: 400,
     });
