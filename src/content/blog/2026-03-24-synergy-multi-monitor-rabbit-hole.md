@@ -34,11 +34,13 @@ Every display connected to a given machine gets flattened into one logical recta
 My layout is not symmetric.
 
 ```
-                                                    [ BUILD | MEDIA ]  ← servers sharing LG ultrawide (PbP)
-[ Work MBP ] [ MBP/MBA LG ultrawide (PbP) ] [ MBA ] [  Samsung 27"  ]
+                                        (  LG wide PbP  )
+                                        [ BUILD | MEDIA ]
+[ Work MBP ] [ Work MBP | MBA ] [ MBA ] [      MBA      ]
+             (  LG wide PbP   )         (    Samsung    )
 ```
 
-The servers live physically above the Samsung. Naturally, I configured Synergy to put them there. Dragged the blocks into position in the GUI, saved the config, tried to push my cursor upward from the Samsung.
+The servers (BUILD and MEDIA) share an LG display, mounted physically above the Samsung. Naturally, I configured Synergy to put them there. Dragged the blocks into position in the GUI, saved the config, tried to push my cursor upward from the Samsung.
 
 Nothing.
 
