@@ -3,7 +3,7 @@ import { getStore } from "@netlify/blobs";
 
 const BLOB_STORE = "now-feeds";
 const BLOB_KEY = "instagram-posts";
-const MAX_POSTS = 9;
+const MAX_POSTS = 27;
 
 interface InstagramPost {
   imageUrl: string;
@@ -15,6 +15,12 @@ interface InstagramPost {
 interface InstagramData {
   lastUpdated: string;
   posts: InstagramPost[];
+}
+
+/** Extract shortcode from an Instagram post URL like https://www.instagram.com/p/ABC123/ */
+function extractShortcode(postUrl: string): string | null {
+  const match = postUrl.match(/instagram\.com\/(?:p|reel)\/([A-Za-z0-9_-]+)/);
+  return match?.[1] ?? null;
 }
 
 export default async function handler(req: Request): Promise<Response> {
@@ -57,21 +63,63 @@ export default async function handler(req: Request): Promise<Response> {
     return new Response("Invalid URLs", { status: 400 });
   }
 
+  const shortcode = extractShortcode(post.postUrl);
+  if (!shortcode) {
+    return new Response("Could not extract shortcode from postUrl", {
+      status: 400,
+    });
+  }
+
   try {
     const store = getStore(BLOB_STORE);
+
+    // Download the image from Instagram CDN before the URL expires
+    const imgResponse = await fetch(post.imageUrl);
+    if (!imgResponse.ok) {
+      console.error(
+        `instagram-webhook: image fetch failed: ${imgResponse.status} ${imgResponse.statusText}`
+      );
+      return new Response("Failed to fetch image", { status: 502 });
+    }
+
+    const imgBytes = await imgResponse.arrayBuffer();
+    const contentType =
+      imgResponse.headers.get("content-type") ?? "image/jpeg";
+
+    // Store the image bytes in a separate blob key
+    await store.set(`instagram-img/${shortcode}`, imgBytes, {
+      metadata: { contentType },
+    });
+
+    // Replace the expiring CDN URL with our permanent serving URL
+    const cachedPost: InstagramPost = {
+      ...post,
+      imageUrl: `/api/instagram-image/${shortcode}`,
+    };
+
     const existing = (await store.get(BLOB_KEY, {
       type: "json",
     })) as InstagramData | null;
 
-    const posts = [post, ...(existing?.posts ?? [])].slice(0, MAX_POSTS);
+    const allPosts = [cachedPost, ...(existing?.posts ?? [])];
+    const posts = allPosts.slice(0, MAX_POSTS);
+    const evicted = allPosts.slice(MAX_POSTS);
 
     await store.setJSON(BLOB_KEY, {
       lastUpdated: new Date().toISOString(),
       posts,
     } satisfies InstagramData);
 
+    // Delete cached image blobs for evicted posts
+    for (const old of evicted) {
+      const oldCode = old.imageUrl.match(/\/api\/instagram-image\/(.+)/)?.[1];
+      if (oldCode) {
+        await store.delete(`instagram-img/${oldCode}`).catch(() => {});
+      }
+    }
+
     console.log(
-      `instagram-webhook: stored post ${post.postUrl} (${posts.length} total)`
+      `instagram-webhook: stored post ${post.postUrl} with cached image (${posts.length} total, ${evicted.length} evicted)`
     );
   } catch (e) {
     console.error(
