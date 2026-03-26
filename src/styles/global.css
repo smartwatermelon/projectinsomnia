@@ -32,6 +32,7 @@
 html {
   font-size: 18px;
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -42,6 +43,8 @@ body {
   min-height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr auto;
+  overflow-wrap: break-word;
+  overflow-x: hidden;
 }
 
 /* Layout — Nav
@@ -92,6 +95,7 @@ main {
   margin: 0 auto;
   padding: 3rem 2rem;
   width: 100%;
+  min-width: 0;
 }
 
 /* Layout — Footer
@@ -146,6 +150,10 @@ code {
   background: var(--color-surface);
   padding: 0.15em 0.35em;
   border-radius: 3px;
+}
+
+pre {
+  overflow-x: auto;
 }
 
 pre code {
@@ -249,4 +257,37 @@ hr {
 .section-nav a.active {
   color: var(--color-accent);
   border-color: var(--color-accent);
+}
+
+/* Responsive
+   ---------------------------------------------------------- */
+@media (max-width: 640px) {
+  header {
+    padding: 1rem;
+  }
+
+  nav {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  nav ul {
+    gap: 1rem;
+  }
+
+  main {
+    padding: 2rem 1rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+  }
+
+  footer {
+    padding: 1.5rem 1rem;
+  }
 }
