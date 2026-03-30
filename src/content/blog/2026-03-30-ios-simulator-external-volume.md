@@ -5,7 +5,7 @@ description: "iOS simulator runtimes can't live on external storage. macOS TCC s
 tags: ["macos", "xcode", "ios", "tcc", "home-lab"]
 ---
 
-I recently set up MIMOLETTE, one of my Mac Mini home lab nodes, as an iOS build server. The machine has a [UGREEN Mac Mini M4 dock](https://us.ugreen.com/products/ugreen-mac-mini-m4-8tb-dock) with an internal M.2 slot, into which I've put a [Crucial P310 2TB NVMe SSD](https://www.crucial.com/ssd/p310/CT2000P310SSD8) — PCIe Gen4, up to 7,100 MB/s read, sitting in a Thunderbolt enclosure. Fast storage, externally mounted, ready to absorb the comically large iOS simulator runtimes that Xcode insists on accumulating.
+I recently set up MIMOLETTE, one of my Mac Mini home lab nodes, as an iOS build server. The machine has a <a href="https://us.ugreen.com/products/ugreen-mac-mini-m4-8tb-dock" target="_blank" rel="noopener noreferrer">UGREEN Mac Mini M4 dock</a> with an internal M.2 slot, into which I've put a <a href="https://www.crucial.com/ssd/p310/CT2000P310SSD8" target="_blank" rel="noopener noreferrer">Crucial P310 2TB NVMe SSD</a> — PCIe Gen4, up to 7,100 MB/s read. Fast storage, externally mounted, ready to absorb the comically large iOS simulator runtimes that Xcode insists on accumulating.
 
 You can probably guess where this is going.
 
@@ -31,7 +31,7 @@ Error copying sample content to path /Volumes/extra-vieille/Simulators/Devices/<
 
 This is not a POSIX permission error, despite the POSIX error code. The directory was `drwxr-xr-x`, owned by my user. The process writing to it (`com.apple.CoreSimulator.CoreSimulatorService`, an XPC service) also runs as my user. By every traditional Unix measure, this should work.
 
-The actual cause is [TCC](https://developer.apple.com/documentation/bundleresources/information-property-list/nsremovablevolumesusagedescription) — macOS's Transparency, Consent, and Control framework. The `CoreSimulatorService` XPC process lacks `NSRemovableVolumesUsageDescription` in its Info.plist, which means macOS never prompts for consent to access removable volumes, and silently denies writes to them. No dialog. No log entry you'd easily find. Just `EPERM`.
+The actual cause is <a href="https://developer.apple.com/documentation/bundleresources/information-property-list/nsremovablevolumesusagedescription" target="_blank" rel="noopener noreferrer">TCC</a> — macOS's Transparency, Consent, and Control framework. The `CoreSimulatorService` XPC process lacks `NSRemovableVolumesUsageDescription` in its Info.plist, which means macOS never prompts for consent to access removable volumes, and silently denies writes to them. No dialog. No log entry you'd easily find. Just `EPERM`.
 
 ---
 
@@ -43,13 +43,15 @@ I tried the following, in roughly increasing order of desperation:
 The volume was mounted `noowners`. Enabling ownership felt like the right first move. It wasn't. TCC doesn't care about ownership.
 
 **2. Full Disk Access for Xcode**
-Added `/Applications/Xcode.app` to System Settings > Privacy & Security > Full Disk Access. [XPC services](https://developer.apple.com/documentation/xpc) launched by launchd don't inherit FDA grants from their parent application. This does nothing.
+Added `/Applications/Xcode.app` to System Settings > Privacy & Security > Full Disk Access. <a href="https://developer.apple.com/documentation/xpc" target="_blank" rel="noopener noreferrer">XPC services</a> launched by launchd don't inherit FDA grants from their parent application. This does nothing.
 
 **3. Full Disk Access for `simdiskimaged`**
 `simdiskimaged` is the process that manages simulator disk images. Sounds relevant. It's not the process that writes device files. `CoreSimulatorService` is.
 
 **4. Full Disk Access for the CoreSimulatorService XPC bundle**
 This is where things get fun. The System Settings file picker *dims* `.xpc` bundles. You cannot add them through the standard UI. The exact process that needs a TCC grant can't receive one through the exact UI designed for granting TCC permissions.
+
+![The Full Disk Access file picker dims .xpc bundles, making them unselectable](/images/blog/CoreSimulatorService-dimmed.png)
 
 **5. Dragging the CoreSimulatorService binary directly into the FDA list**
 You can get to the actual binary inside the XPC bundle through Finder and drag it in. I did this. TCC grants on a bare binary don't propagate to the XPC service process, because XPC services are matched by *bundle identifier*, not executable path. Nice try though.
@@ -62,7 +64,7 @@ Side effect: after creating `synthetic.conf` referencing the external volume and
 **7. bindfs via fuse-t**
 This was the most promising approach. The theory: mount the external volume *through* a FUSE filesystem at the standard local path, so TCC sees a local path and the removable-volumes check never fires.
 
-I installed [fuse-t](https://www.fuse-t.org/) (no kernel extension required), built [bindfs](https://bindfs.org/) 1.18.4 from source against the fuse-t headers (pkgconf needed some manual header symlink surgery), and mounted:
+I installed <a href="https://www.fuse-t.org/" target="_blank" rel="noopener noreferrer">fuse-t</a> (no kernel extension required), built <a href="https://bindfs.org/" target="_blank" rel="noopener noreferrer">bindfs</a> 1.18.4 from source against the fuse-t headers (pkgconf needed some manual header symlink surgery), and mounted:
 
 ```bash
 bindfs /Volumes/extra-vieille/Simulators/Devices \
@@ -87,7 +89,7 @@ mkdir ~/Library/Developer/CoreSimulator/Devices
 
 `xcrun simctl create` worked immediately.
 
-The simulator runtimes live on the internal disk. The expensive fast NVMe in the Thunderbolt enclosure holds other things.
+The simulator runtimes live on the internal disk. The fast NVMe in the dock holds my entire developer environment, source code, and (maybe) Android emulator images, unless Android Studio is as obstinate as Xcode.
 
 ---
 
@@ -95,14 +97,14 @@ The simulator runtimes live on the internal disk. The expensive fast NVMe in the
 
 Apple ships Xcode with simulator runtimes that are multiple gigabytes each. The Mac Mini M4 has a Thunderbolt 4 port. As of macOS 26, there's no supported path for putting those runtimes on external storage, because:
 
-- `CoreSimulatorService` has no [`NSRemovableVolumesUsageDescription`](https://developer.apple.com/documentation/bundleresources/information-property-list/nsremovablevolumesusagedescription)
+- `CoreSimulatorService` has no <a href="https://developer.apple.com/documentation/bundleresources/information-property-list/nsremovablevolumesusagedescription" target="_blank" rel="noopener noreferrer"><code>NSRemovableVolumesUsageDescription</code></a>
 - There is no documented configuration key for a custom device storage path
 - XPC services cannot be added to Full Disk Access through the standard UI
 - The XPC sandbox blocks non-native filesystem mounts in addition to removable volumes
 
 Whether this is an oversight, a constraint that predates fast external storage being common, or something on a future roadmap — I don't know. What I do know is that on macOS 26, you can't do it today.
 
-I filed feedback at [feedbackassistant.apple.com](https://feedbackassistant.apple.com) under Developer Tools > Simulator in case it's useful signal.
+I filed feedback at <a href="https://feedbackassistant.apple.com" target="_blank" rel="noopener noreferrer">feedbackassistant.apple.com</a> under Developer Tools > Simulator in case it's useful signal.
 
 ---
 
@@ -120,4 +122,4 @@ If you went down any of these paths, here's what to clean up:
 
 ---
 
-*MIMOLETTE is a refurbished M4 Mac Mini (10-core CPU, 10-core GPU, Gigabit Ethernet), running macOS 26 and Xcode 26.4. The external SSD is now used for other things.*
+*MIMOLETTE is a refurbished M4 Mac Mini (10-core CPU, 10-core GPU, Gigabit Ethernet), running macOS 26 and Xcode 26.4.*
