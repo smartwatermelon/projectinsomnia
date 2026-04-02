@@ -144,3 +144,11 @@ Total time investment: maybe 15 hours across a few weeks, including all the iter
 Whether it reduces Juliet's Thumbtack spend remains to be seen. That's the actual measure of success. The site itself is just plumbing — a way to get better leads for less money. If it works, the return on investment is essentially infinite. If it doesn't, at least she has a professional web presence that cost next to nothing.
 
 Either way, I got to build something real for someone who will actually use it. That's more satisfying than another side project that lives in a private repo forever.
+
+---
+
+## Two Ways to Interpret This Post
+
+If you're an employer and you're thinking *I want someone who builds things like this on a team that has actual resources* — [I'm on LinkedIn](https://www.linkedin.com/in/andrewrich/) and [reachable by email](mailto:andrew@projectinsomnia.com). I'm a Principal SRE by trade, but as you can tell, the design and front-end work doesn't exactly get farmed out.
+
+If you're a business owner thinking *I want a site like this for my business* — that's exactly what [Night Owl Studio](https://nightowlstudio.us/) is for. Custom web work, done by a person who gives a damn about how it looks and whether it actually works.
