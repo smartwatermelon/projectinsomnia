@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# .ralph/validate — run by night-shift before accepting changes.
+# Projectinsomnia has no test suite, so validation is build-only.
+set -euo pipefail
+
+SCRIPT_DIR="$(command dirname "${BASH_SOURCE[0]}")"
+REPO_ROOT="$(command realpath "${SCRIPT_DIR}/..")"
+
+# ── 0. Ensure dependencies are installed ─────────────────────────────────────
+if [[ ! -d "${REPO_ROOT}/node_modules" ]]; then
+  echo "Installing dependencies..."
+  (builtin cd "${REPO_ROOT}" && npm ci --no-audit --no-fund) || {
+    echo "  FAIL: npm ci failed"
+    exit 1
+  }
+fi
+
+# ── 1. Build ─────────────────────────────────────────────────────────────────
+echo "Running build..."
+if ! (builtin cd "${REPO_ROOT}" && npm run build 2>&1 | tail -10); then
+  echo "  FAIL: build failed"
+  exit 1
+fi
+echo "  Build passed"
