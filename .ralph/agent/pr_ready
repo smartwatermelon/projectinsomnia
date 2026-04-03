@@ -1,0 +1,1 @@
+done: updated instagram-webhook.mts to capture raw body text before JSON parsing and log it on parse failure, explicitly documenting that IFTTT <<<>>> encodes double-quotes; build passes

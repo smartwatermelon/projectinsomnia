@@ -47,11 +47,19 @@ export default async function handler(req: Request): Promise<Response> {
   }
 
   // Use IFTTT's <<<{{Ingredient}}>>> escaping in the body template to safely embed
-  // values in JSON (handles quotes in captions, & in CDN URLs, etc.)
+  // values in JSON. IFTTT's <<<>>> syntax JSON-encodes ingredient values, including
+  // escaping double-quote characters as \" — so captions with quotes are safe.
+  // If parsing fails anyway (e.g. IFTTT template is missing <<<>>> wrappers), log
+  // the raw body to make the failure diagnosable rather than silently dropping the post.
   let post: InstagramPost;
+  let bodyText = "";
   try {
-    post = (await req.json()) as InstagramPost;
+    bodyText = await req.text();
+    post = JSON.parse(bodyText) as InstagramPost;
   } catch {
+    console.error(
+      `instagram-webhook: JSON parse failed — check IFTTT template uses <<<>>> escaping. Raw body (first 500 chars): ${bodyText.slice(0, 500)}`
+    );
     return new Response("Invalid JSON", { status: 400 });
   }
 
