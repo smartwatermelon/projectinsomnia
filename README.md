@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/5e486b9a-5632-4b9a-9b01-9d0891a125b3/deploy-status)](https://app.netlify.com/projects/projectinsomnia/deploys)
+
 # Project Insomnia
 
 Personal site for [Andrew Rich](https://projectinsomnia.com) — writing, projects, and a live /now page.
