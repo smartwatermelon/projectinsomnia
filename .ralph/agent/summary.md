@@ -2,7 +2,7 @@
 
 **Status:** Completed successfully
 **Iterations:** 1
-**Duration:** 1m 6s
+**Duration:** 31s
 
 ## Tasks
 
@@ -14,4 +14,4 @@ _No events recorded._
 
 ## Final Commit
 
-3d8b4db: fix(tech-debt): resolve #15 — Verify IFTTT <<<>>> escaping handles double-quote characters in Instagram captions
+74f2782: fix(tech-debt): resolve #12 — Instagram webhook uses Authorization header but IFTTT design doc specifies query param secret
