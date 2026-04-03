@@ -1,6 +1,6 @@
 ---
 title: "Building a Website for Someone Who Actually Uses It"
-date: 2026-04-02
+date: 2026-04-07
 description: "A cleaning business runs on Thumbtack at $30 per contact. I built a static site on Netlify to filter leads, cut costs, and give the owner a web presence she can edit herself."
 tags: ["web", "design", "netlify"]
 ---
