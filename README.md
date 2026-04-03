@@ -44,6 +44,30 @@ Set in Netlify dashboard (not committed):
 | `STRAVA_CLIENT_SECRET` | strava-feed function |
 | `STRAVA_REFRESH_TOKEN` | strava-feed function |
 | `INSTAGRAM_WEBHOOK_SECRET` | instagram-webhook function |
+| `BUILD_HOOK_URL` | scheduled-rebuild function |
+
+## Blog Publishing
+
+Posts use two frontmatter fields to control visibility:
+
+- **`draft: true`** — never published, regardless of date
+- **`date`** — the publish date; future-dated posts are hidden until that date arrives
+
+### Publish modes
+
+| Mode | How | When it goes live |
+| :--- | :-- | :---------------- |
+| Scheduled | Set `date` to a future date, `draft: false`, merge to main | Automatically at ~6am PT on/after that date |
+| Immediate | Set `date` to today, merge, then trigger the build hook | Minutes after triggering |
+| Draft | Set `draft: true` | Never (until you remove the flag) |
+
+### Manual publish trigger
+
+```sh
+curl -sX POST "$BUILD_HOOK_URL"
+```
+
+The build hook URL is stored as `BUILD_HOOK_URL` in Netlify environment variables. A Netlify Scheduled Function triggers a rebuild daily at ~6am PT (1pm UTC) to sweep up any posts whose date has arrived.
 
 ## Development
 
