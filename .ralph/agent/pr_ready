@@ -1,1 +1,0 @@
-done: updated instagram-webhook.mts to accept secret via ?secret= query param (per design doc) in addition to Authorization: Bearer header, verified with npm run build
