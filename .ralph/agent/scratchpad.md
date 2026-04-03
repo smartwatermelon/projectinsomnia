@@ -1,15 +1,16 @@
+# Issue #12: Instagram webhook secret validation
+
 ## Attempt 1
 
-**Issue #15:** Verify IFTTT `<<<>>>` escaping handles double-quote characters in Instagram captions.
+**What I tried:** Added support for `?secret=` query param in addition to `Authorization: Bearer` header.
 
-**History learned:**
-- PR #13 switched to form-encoding because IFTTT substitutes ingredients without escaping in JSON templates
-- PR #14 switched back to JSON + `<<<>>>` escaping, claiming it handles quotes
-- Issue #15 flagged that double-quote handling was unverified and failures would be "silently dropped" (400 with no logging)
+**Design doc** (`docs/plans/2026-03-13-instagram-feed-design.md`) specifies:
+```
+POST /api/instagram-webhook?secret=INSTAGRAM_WEBHOOK_SECRET
+```
 
-**Change made:**
-- In `netlify/functions/instagram-webhook.mts`, switched from `req.json()` to `req.text()` + `JSON.parse()` so the raw body is captured before parsing
-- Updated comment to explicitly state `<<<>>>` JSON-encodes values including double-quotes (escapes `"` as `\"`)
-- Added diagnostic `console.error` logging on parse failure that dumps the first 500 chars of the raw body — makes failures diagnosable rather than silently dropped
+**Previous implementation** only checked `Authorization: Bearer` header (lines 43-46).
 
-**Result:** Build passed.
+**Fix:** In `netlify/functions/instagram-webhook.mts`, now checks `url.searchParams.get("secret")` first, then falls back to the `Authorization: Bearer` header. This ensures both IFTTT configurations (design doc's query param OR custom header) work correctly.
+
+**Result:** Build passed. Written `pr_ready` with success.

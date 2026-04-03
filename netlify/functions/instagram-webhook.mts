@@ -40,8 +40,11 @@ export default async function handler(req: Request): Promise<Response> {
     return new Response("Service misconfigured", { status: 503 });
   }
 
+  const url = new URL(req.url);
+  const querySecret = url.searchParams.get("secret");
   const auth = req.headers.get("authorization");
-  const secret = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
+  const headerSecret = auth?.startsWith("Bearer ") ? auth.slice(7) : null;
+  const secret = querySecret ?? headerSecret;
   if (!secret || secret !== process.env.INSTAGRAM_WEBHOOK_SECRET) {
     return new Response("Unauthorized", { status: 401 });
   }
