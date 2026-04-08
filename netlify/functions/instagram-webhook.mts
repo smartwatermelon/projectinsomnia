@@ -46,8 +46,10 @@ export default async function handler(req: Request): Promise<Response> {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  // Use IFTTT's <<<{{Ingredient}}>>> escaping in the body template to safely embed
-  // values in JSON (handles quotes in captions, & in CDN URLs, etc.)
+  // IFTTT's <<<{{Ingredient}}>>> syntax applies JSON string encoding to the ingredient
+  // value before substitution — double-quotes become \", backslashes become \\, and
+  // newlines become \n. A caption like She said "hi" arrives as She said \"hi\" inside
+  // the JSON string, so req.json() parses correctly even when captions contain quotes.
   let post: InstagramPost;
   try {
     post = (await req.json()) as InstagramPost;
