@@ -1,1 +1,0 @@
-done: Updated the comment in netlify/functions/instagram-webhook.mts to explicitly document that IFTTT's <<<>>> syntax applies JSON string encoding (escaping " as \"), verified via npm run build succeeding.
