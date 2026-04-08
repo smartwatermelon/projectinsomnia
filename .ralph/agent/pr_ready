@@ -1,0 +1,1 @@
+done: Updated CLAUDE.md File Paths section to reference docs/SPEC.md and docs/BACKLOG.md instead of the incorrect root-level paths; verified with markdownlint and npm run build.
