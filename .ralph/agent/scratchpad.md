@@ -1,14 +1,11 @@
+## Issue #10 — Strava refresh token rotation warning
 
-## Issue #15 — IFTTT double-quote escaping
+**Attempt 1 (complete)**
 
-### Attempt 1
+Issue: `strava-feed.mts` only extracted `access_token` from the token refresh response, silently discarding any new `refresh_token` Strava might issue.
 
-**Issue:** Verify IFTTT `<<<>>>` escaping handles double-quote characters in Instagram captions.
+Fix: Destructured `refresh_token` from the response and added a `console.warn` when the returned refresh token differs from the env var. This is a lightweight early-warning signal as requested in the issue.
 
-**Analysis:** The existing code comment claimed `<<<>>>` "handles quotes in captions" but without explaining why, leaving the concern open. IFTTT's `<<<{{field}}>` syntax applies JSON string encoding to ingredient values before substitution — double-quotes become `\"`, backslashes become `\\`, newlines become `\n`. This is why the JSON parse works correctly.
+Build: `npm run build` — passed clean.
 
-**Fix:** Updated the comment in `netlify/functions/instagram-webhook.mts` at the `req.json()` block to explicitly document the JSON string encoding behavior, directly answering the "unverified" concern.
-
-**Build result:** Passed on first attempt.
-
-**Status:** Done.
+Result: wrote `done:` to `.ralph/agent/pr_ready`.

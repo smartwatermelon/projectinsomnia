@@ -31,9 +31,16 @@ export default async function handler(): Promise<Response> {
       return Response.json({ items: [] }, { status: 502 });
     }
 
-    const { access_token } = (await tokenRes.json()) as {
+    const { access_token, refresh_token: newRefreshToken } = (await tokenRes.json()) as {
       access_token: string;
+      refresh_token?: string;
     };
+
+    if (newRefreshToken && newRefreshToken !== refreshToken) {
+      console.warn(
+        "strava-feed: Strava issued a new refresh token — update STRAVA_REFRESH_TOKEN env var to avoid auth failure"
+      );
+    }
 
     const activitiesRes = await fetch(
       `https://www.strava.com/api/v3/athlete/activities?per_page=${MAX_ITEMS}`,
