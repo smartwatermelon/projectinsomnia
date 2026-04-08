@@ -16,10 +16,10 @@ alongside the existing GitHub and Strava feeds.
 
 Push-based (IFTTT fires on new post) rather than pull-based (no polling API).
 
-```
+```text
 You post on Instagram
   → IFTTT applet triggers
-    → POST /api/instagram-webhook?secret=... (Netlify function)
+    → POST /api/instagram-webhook (Netlify function, Bearer token auth)
         → prepend post to Netlify Blobs, keep newest 9
 
 Browser loads /now
@@ -37,10 +37,11 @@ after applet is live. Empty state shown until first post arrives.
 
 - **Trigger**: Instagram → "New photo by you"
 - **Action**: Webhooks → Make a web request
-  - URL: `https://projectinsomnia.netlify.app/api/instagram-webhook?secret=INSTAGRAM_WEBHOOK_SECRET`
+  - URL: `https://projectinsomnia.netlify.app/api/instagram-webhook`
   - Method: POST
   - Content Type: application/json
-  - Body: `{"imageUrl":"{{SourceUrl}}","caption":"{{Caption}}","postUrl":"{{Url}}","timestamp":"{{CreatedAt}}"}`
+  - Additional Headers: `Authorization: Bearer INSTAGRAM_WEBHOOK_SECRET`
+  - Body: `{"imageUrl":"<<<{{SourceUrl}}>>>","caption":"<<<{{Caption}}>>>","postUrl":"<<<{{Url}}>>>","timestamp":"<<<{{CreatedAt}}>>>"}`
 
 Ingredient names (`SourceUrl`, `Caption`, `Url`, `CreatedAt`) verified against
 IFTTT's Instagram ingredient picker.
@@ -83,7 +84,8 @@ Max 9 posts stored. Webhook prepends new post and trims array to 9.
 ### `instagram-webhook.mts` — receives IFTTT pushes
 
 - Route: `/api/instagram-webhook`
-- Validates `?secret=` query param against `INSTAGRAM_WEBHOOK_SECRET`; returns 401 on mismatch
+- Validates `Authorization: Bearer` header against
+  `INSTAGRAM_WEBHOOK_SECRET`; returns 401 on mismatch
 - Reads current posts from Blob store (empty array if not yet initialized)
 - Prepends new post, trims to 9, writes back
 - Returns 200 on success
@@ -103,7 +105,7 @@ Max 9 posts stored. Webhook prepends new post and trims array to 9.
 
 Two-column CSS grid on desktop, single column on mobile:
 
-```
+```text
 ┌─────────────────────┬─────────────────┐
 │  GitHub             │  Instagram      │
 │  ▾ Recent activity  │  [▪][▪][▪]      │
@@ -133,7 +135,7 @@ Breakpoint: `< 640px` collapses to single column, Instagram below Strava.
 ## Files Changed
 
 | File | Change |
-|------|--------|
+| ------ | -------- |
 | `netlify/functions/instagram-webhook.mts` | New webhook receiver |
 | `netlify/functions/instagram-feed.mts` | New feed reader |
 | `src/pages/now.astro` | Two-column layout + Instagram column |
