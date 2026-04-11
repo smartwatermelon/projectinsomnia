@@ -5,11 +5,11 @@ description: "OpenVPN on TCP/443 through a Synology NAS, with DNS tricks to make
 tags: ["tech", "home-lab", "networking"]
 ---
 
-I have a build server in my home office. It's a Mac Mini M4 called MIMOLETTE, named after the French cheese, because all my servers are named after cheeses. It runs my CI pipelines, hosts my dev environments, and generally does the heavy lifting while I'm out pretending to have a life. The problem is that "out pretending to have a life" sometimes means "sitting in the Alaska Airlines lounge at SFO needing to push a hotfix."
+I have a build server in my home office. It's a Mac Mini M4 called MIMOLETTE, named after the French cheese, because all my servers are [named after cheeses](https://en.wikipedia.org/wiki/Cheese_Shop_sketch). It runs my CI pipelines, hosts my dev environments, and generally does the heavy lifting while I'm out pretending to have a life. The problem is that "out pretending to have a life" sometimes means "sitting in the Alaska Airlines lounge at LAX needing to push a hotfix."
 
 For years the answer to "how do I get into my home network remotely" was "I don't, really." My previous job came with a corporate laptop and a corporate VPN and a corporate IT department that handled all of this. Now I'm [running my own studio](https://nightowlstudio.us/), which means the corporate laptop is gone and the problem is mine.
 
-So. Time to build a tunnel.
+So. Time to build a [tunnel](https://www.youtube.com/watch?v=8Vn8VGvtlnY).
 
 ---
 
@@ -22,15 +22,15 @@ The requirements were simple to state and annoying to satisfy:
 - Not obviously findable by automated scanners
 - Not exposing port 22 to the internet under any circumstances
 
-That last one is non-negotiable. Anyone who's watched a `fail2ban` log for five minutes knows that port 22 on a public IP gets hammered constantly by bots looking for weak credentials. The right answer is that SSH should never be directly visible from the internet at all.
+That last one is non-negotiable. Anyone who's watched a `fail2ban` [log](https://www.the-art-of-web.com/system/fail2ban-log/) for five minutes knows that port 22 on a public IP gets hammered constantly by bots looking for weak credentials. The right answer is that SSH should never be directly visible from the internet at all.
 
 ---
 
 ## The Plan: OpenVPN on TCP/443
 
-My home network runs Quantum Fiber into a [TP-Link Deco](https://www.tp-link.com/us/deco-mesh-wifi/) mesh router, then into [Meraki switches](https://meraki.cisco.com/) and a rack of named servers. The always-on anchor is ROMANO, a [Synology DS923+](https://www.synology.com/en-us/products/DS923+) NAS that runs 24/7 and handles backups, media, and now, VPN.
+My home network runs Quantum Fiber into a [TP-Link Deco](https://www.tp-link.com/us/deco-mesh-wifi/) mesh router, then into a [Meraki switch](https://meraki.cisco.com/) (thanks, former^2 employer) and a rack of named servers. The always-on anchor is ROMANO, a [Synology DS923+](https://www.synology.com/en-us/products/DS923+) NAS that runs 24/7 and handles backups, media, and now, VPN.
 
-The architecture: OpenVPN running on ROMANO, accessible from the internet on **TCP port 443**. Port 443 is HTTPS. Almost no network blocks outbound 443/TCP — doing so breaks the entire web. To a basic firewall, my VPN traffic looks like ordinary HTTPS. Networks with SSL inspection proxies or deep packet inspection can still fingerprint OpenVPN's handshake, but in practice most airport and hotel networks don't bother. This is exactly why [PIA](https://www.privateinternetaccess.com/) saved me at that Alaska lounge when their OpenVPN-over-TCP mode was the only thing that could reach GitHub's SSH port. I'm just replicating that trick for my own infrastructure.
+The architecture: OpenVPN running on ROMANO, accessible from the internet (via port-forwarding) on **TCP port 443**. Port 443 is HTTPS. Almost no network blocks outbound 443/TCP — doing so breaks the entire web. To a basic firewall, my VPN traffic looks like ordinary HTTPS. Networks with SSL inspection proxies or deep packet inspection can still fingerprint OpenVPN's handshake, but in practice most airport and hotel networks don't bother. This is exactly why [PIA](https://www.privateinternetaccess.com/) saved me at that Alaska lounge when their OpenVPN-over-TCP mode was the only thing that could reach GitHub's SSH port. I'm just replicating that trick for my own infrastructure.
 
 The port forwarding chain is a bit involved:
 
@@ -44,7 +44,7 @@ Client → homelab.example:443
 
 The ISP gateway handles the 443→10443 translation at the WAN edge. The Deco forwards 10443 to ROMANO. The non-standard internal port means nothing on my LAN is accidentally competing with something else on 443, and a scanner that finds the port gets silence — OpenVPN with TLS auth key enabled drops packets from unknown clients before completing any handshake.
 
-I own the domain via [Cloudflare](https://www.cloudflare.com/), which is what the client connects to. DDNS is handled by [`cloudflare-ddns`](https://github.com/favonia/cloudflare-ddns) running on TILSIT, so if my home IP changes the A record updates automatically.
+I own the domain via [Cloudflare](https://www.cloudflare.com/), which is what the client connects to. DDNS is handled by [`cloudflare-ddns`](https://github.com/favonia/cloudflare-ddns) running on TILSIT, so if my home IP changes the A record updates automatically. (At some point I'll move DDNS to ROMANO as well; it's on the ever-growing to-do list.)
 
 ---
 
@@ -92,6 +92,8 @@ This is a fundamental property of [mDNS](https://en.wikipedia.org/wiki/Multicast
 The theoretical fix is [Avahi's reflector mode](https://www.avahi.org/). Set `enable-reflector=yes` and `allow-point-to-point=yes` in `/etc/avahi/avahi-daemon.conf` **on ROMANO** (the NAS runs Linux under the hood, and Avahi is its mDNS implementation). Avahi then bridges mDNS traffic between the LAN and the VPN tunnel interface. This works on the server side — `avahi-browse -alr` **on the NAS** shows the tunnel. But `dscacheutil -q host -a name mimolette.local` **on the Mac** still returns nothing, because `mDNSResponder` on the client never sends the multicast query out the tunnel in the first place.
 
 The actual fix is a real DNS server with actual A records, pointed at by a resolver file that tells macOS to use unicast DNS for `.local` rather than mDNS.
+
+> **A note on Avahi reflector mode**: If you followed guides suggesting you enable `enable-reflector=yes` and `allow-point-to-point=yes` in `/etc/avahi/avahi-daemon.conf` on the NAS — undo those changes. The reflector doesn't solve the problem (macOS's `mDNSResponder` never sends multicast queries out the tunnel in the first place), and running it causes duplicate mDNS resolver conflicts on your LAN. The symptom is your Mac's hostname getting renamed to `hostname-2` or `hostname-randomstring` on every wake, accompanied by a system notification that a duplicate name was found on the network — Avahi is re-announcing your Mac's hostname from the NAS side, and `mDNSResponder` loses the collision detection race. Revert to the default Avahi config: `allow-interfaces=eth0,eth1`, `allow-point-to-point=no`, `enable-reflector=no`, then `sudo systemctl restart avahi.service`. The BIND-based solution below is the right path.
 
 ---
 
