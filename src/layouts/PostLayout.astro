@@ -1,5 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import { metaTags } from '../lib/metaTags';
 
 interface Props {
   title: string;
@@ -35,7 +36,7 @@ const back = backLinks[collection];
       <h1>{title}</h1>
       <div class="post-meta">
         <time datetime={date.toISOString()}>{dateStr}</time>
-        {tags.filter(t => !['blog', 'ouatrevisit', 'elections'].includes(t)).map(tag => (
+        {tags.filter(t => !(metaTags as readonly string[]).includes(t)).map(tag => (
           <a href={`/blog/?tag=${encodeURIComponent(tag)}`} class="tag">{tag}</a>
         ))}
       </div>

@@ -282,6 +282,11 @@ a.tag.active {
   color: var(--color-accent);
 }
 
+.empty-state {
+  color: var(--color-muted);
+  font-style: italic;
+}
+
 /* Components — Section Nav
    ---------------------------------------------------------- */
 .section-nav {
