@@ -28,7 +28,7 @@ That last one is non-negotiable. Anyone who's watched a `fail2ban` log for five 
 
 ## The Plan: OpenVPN on TCP/443
 
-My home network runs Quantum Fiber into a [TP-Link Deco](https://www.tp-link.com/us/deco-mesh-wifi/) mesh router, then into [Meraki switches](https://meraki.cisco.com/) and a rack of named servers. The always-on anchor is [ROMANO](https://www.synology.com/), a Synology DS923+ NAS that runs 24/7 and handles backups, media, and now, VPN.
+My home network runs Quantum Fiber into a [TP-Link Deco](https://www.tp-link.com/us/deco-mesh-wifi/) mesh router, then into [Meraki switches](https://meraki.cisco.com/) and a rack of named servers. The always-on anchor is ROMANO, a [Synology DS923+](https://www.synology.com/en-us/products/DS923+) NAS that runs 24/7 and handles backups, media, and now, VPN.
 
 The architecture: OpenVPN running on ROMANO, accessible from the internet on **TCP port 443**. Port 443 is HTTPS. Almost no network blocks outbound 443/TCP — doing so breaks the entire web. To a basic firewall, my VPN traffic looks like ordinary HTTPS. Networks with SSL inspection proxies or deep packet inspection can still fingerprint OpenVPN's handshake, but in practice most airport and hotel networks don't bother. This is exactly why [PIA](https://www.privateinternetaccess.com/) saved me at that Alaska lounge when their OpenVPN-over-TCP mode was the only thing that could reach GitHub's SSH port. I'm just replicating that trick for my own infrastructure.
 
@@ -114,7 +114,7 @@ On ASIAGO (the MacBook Air), `/etc/resolver/local` with a single line:
 nameserver 10.0.15.67
 ```
 
-This tells macOS's resolver (documented in [`man 5 resolver`](x-man-page://5/resolver)) to send `.local` queries to ROMANO via unicast DNS. It doesn't disable mDNS — it adds a parallel unicast resolution path. The first response wins. Since mDNS can't function over the tunnel (the TUN interface lacks multicast), the unicast path is the only one that returns results, and it looks like an override in practice.
+This tells macOS's resolver (documented in `man 5 resolver`) to send `.local` queries to ROMANO via unicast DNS. It doesn't disable mDNS — it adds a parallel unicast resolution path. The first response wins. Since mDNS can't function over the tunnel (the TUN interface lacks multicast), the unicast path is the only one that returns results, and it looks like an override in practice.
 
 When the tunnel is down, the file shouldn't exist — you want normal mDNS to handle `.local` on whatever network you're actually on. If the file sticks around while you're on the local LAN, you get a race between mDNS and unicast DNS that can cause intermittent resolution delays.
 
@@ -131,6 +131,8 @@ Tunnelblick supports scripts that run when a VPN connects and disconnects. The r
 ```bash
 #!/bin/bash
 mkdir -p /etc/resolver
+# Overwrites any existing /etc/resolver/local — if you have
+# other split-DNS entries there, back them up first.
 echo "nameserver 10.0.15.67" > /etc/resolver/local
 ```
 
