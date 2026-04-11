@@ -3,13 +3,44 @@ import { getCollection } from 'astro:content';
 import { slugFromId } from '../../lib/slugFromId';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
+export const prerender = false;
+
+const metaTags = ['blog', 'ouatrevisit', 'elections'];
+
 const now = new Date();
-const posts = (await getCollection('blog'))
+const allPosts = (await getCollection('blog'))
   .filter(p => !p.data.draft && p.data.date <= now)
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+// Build tag counts
+const tagCounts = new Map<string, number>();
+for (const post of allPosts) {
+  for (const tag of post.data.tags ?? []) {
+    if (!metaTags.includes(tag)) {
+      tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+    }
+  }
+}
+const sortedTags = [...tagCounts.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+
+// Size buckets based on post count
+const maxCount = Math.max(...tagCounts.values(), 1);
+function tagSize(count: number): string {
+  const ratio = count / maxCount;
+  if (ratio > 0.75) return 'tag-xl';
+  if (ratio > 0.5) return 'tag-lg';
+  if (ratio > 0.25) return 'tag-md';
+  return 'tag-sm';
+}
+
+// Filter by active tag
+const activeTag = Astro.url.searchParams.get('tag');
+const posts = activeTag
+  ? allPosts.filter(p => (p.data.tags ?? []).includes(activeTag))
+  : allPosts;
 ---
 
-<BaseLayout title="Blog">
+<BaseLayout title={activeTag ? `Blog — #${activeTag}` : 'Blog'}>
   <h1>Blog</h1>
 
   <nav class="section-nav">
@@ -17,6 +48,22 @@ const posts = (await getCollection('blog'))
     <a href="/blog/ouatrevisit/">Once Upon a Time Revisit</a>
     <a href="/blog/elections/">Elections</a>
   </nav>
+
+  <div class="tag-cloud">
+    {sortedTags.map(([tag, count]) => (
+      <a
+        href={`/blog/?tag=${encodeURIComponent(tag)}`}
+        class:list={['tag', tagSize(count), { active: tag === activeTag }]}
+      >{tag}</a>
+    ))}
+  </div>
+
+  {activeTag && (
+    <div class="tag-filter-status">
+      Showing posts tagged <strong>{activeTag}</strong>
+      <a href="/blog/" class="clear-filter">clear</a>
+    </div>
+  )}
 
   <ul class="post-list">
     {posts.map(post => {
@@ -29,8 +76,10 @@ const posts = (await getCollection('blog'))
               {post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
             </time>
             {(post.data.tags ?? [])
-              .filter(t => !['blog', 'ouatrevisit', 'elections'].includes(t))
-              .map(tag => <span class="tag">{tag}</span>)
+              .filter(t => !metaTags.includes(t))
+              .map(tag => (
+                <a href={`/blog/?tag=${encodeURIComponent(tag)}`} class="tag">{tag}</a>
+              ))
             }
           </div>
         </li>

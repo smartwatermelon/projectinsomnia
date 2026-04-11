@@ -36,7 +36,7 @@ const back = backLinks[collection];
       <div class="post-meta">
         <time datetime={date.toISOString()}>{dateStr}</time>
         {tags.filter(t => !['blog', 'ouatrevisit', 'elections'].includes(t)).map(tag => (
-          <span class="tag">{tag}</span>
+          <a href={`/blog/?tag=${encodeURIComponent(tag)}`} class="tag">{tag}</a>
         ))}
       </div>
       {mediumUrl && (
