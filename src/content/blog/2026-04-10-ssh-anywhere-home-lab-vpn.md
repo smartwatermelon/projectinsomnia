@@ -55,7 +55,7 @@ Synology's [VPN Server package](https://www.synology.com/en-us/dsm/packages/VPNC
 - **Dynamic IP address**: `172.16.0.1` (I'm using `172.16.0.0/24` for the VPN subnet — my LAN is `10.0.15.x`, so `10.x` was already taken)
 - **Port**: `10443`
 - **Protocol**: TCP
-- **Authentication**: HMAC-SHA512 (the `--auth` directive — this is a keyed message authentication code, not just a hash, which means packets from unknown clients are rejected before processing)
+- **Authentication**: HMAC-SHA512 (the `--auth` directive — this sets the keyed message authentication code for the data channel, ensuring packet integrity and authenticity once the tunnel is established)
 - **Compression**: off (the [VORACLE](https://openvpn.net/security-advisory/the-voracle-attack-vulnerability/) attack demonstrated that compression on an encrypted VPN channel can leak plaintext, and most traffic inside the tunnel is already encrypted HTTPS — compressing high-entropy data wastes CPU for zero bandwidth savings)
 - **Allow clients to access server's LAN**: on — this is the whole point
 - **Verify TLS auth key**: on — this is what makes the server non-responsive to unknown clients
