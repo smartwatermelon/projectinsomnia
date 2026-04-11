@@ -234,6 +234,54 @@ hr {
   margin-right: 0.25rem;
 }
 
+a.tag:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+a.tag.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+}
+
+/* Components — Tag Cloud
+   ---------------------------------------------------------- */
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+  align-items: baseline;
+}
+
+.tag-cloud .tag-sm {
+  font-size: 0.75rem;
+}
+.tag-cloud .tag-md {
+  font-size: 0.9rem;
+}
+.tag-cloud .tag-lg {
+  font-size: 1.1rem;
+}
+.tag-cloud .tag-xl {
+  font-size: 1.3rem;
+}
+
+/* Components — Tag Filter Status
+   ---------------------------------------------------------- */
+.tag-filter-status {
+  font-size: 0.875rem;
+  color: var(--color-muted);
+  margin-bottom: 1rem;
+}
+
+.clear-filter {
+  margin-left: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--color-accent);
+}
+
 /* Components — Section Nav
    ---------------------------------------------------------- */
 .section-nav {
