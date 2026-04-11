@@ -15,7 +15,7 @@ const allPosts = (await getCollection('blog'))
 const tagCounts = new Map<string, number>();
 for (const post of allPosts) {
   for (const tag of post.data.tags ?? []) {
-    if (!metaTags.includes(tag)) {
+    if (!(metaTags as readonly string[]).includes(tag)) {
       tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
     }
   }
@@ -79,7 +79,7 @@ const posts = activeTag
               {post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
             </time>
             {(post.data.tags ?? [])
-              .filter(t => !metaTags.includes(t))
+              .filter(t => !(metaTags as readonly string[]).includes(t))
               .map(tag => (
                 <a href={`/blog/?tag=${encodeURIComponent(tag)}`} class="tag">{tag}</a>
               ))
