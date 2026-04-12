@@ -1,6 +1,6 @@
 ---
 title: "My AI Assistant Was Reading Its Own Credentials From a Text File"
-date: 2026-04-12
+date: 2026-04-14
 description: "Migrating Claude Code and Claude Desktop off on-disk secrets and onto 1Password service accounts: one vault, one token in Keychain, no plaintext anywhere. Plus a macOS TCC database detour."
 tags: ["tech", "security", "1password", "claude"]
 ---
