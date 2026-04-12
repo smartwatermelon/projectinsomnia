@@ -47,7 +47,7 @@ security add-generic-password \
   -A   # allow access by any application without prompting
 ```
 
-The `-A` flag matters. Without it, every new process that reads the item triggers a permission dialog.
+The `-A` flag matters. Without it, every new process that reads the item triggers a permission dialog. (The tradeoff: any user-space process can then read this Keychain item silently, without prompting. Since the threat model here is malware-with-user-privileges reading a service-account token whose blast radius is already "read one vault," I'm comfortable with it. You should think about whether you are.)
 
 One aside: the [1Password GitHub shell plugin](https://developer.1password.com/docs/cli/shell-plugins/github/) is the official mechanism for injecting `GH_TOKEN` per invocation, and it works by creating an alias: `alias gh="op plugin run -- gh"`. That alias collides with a `gh()` bash function I have for enforcing pre-merge review hooks. In bash, an alias expands at parse time and turns `gh() {` into `op plugin run -- gh() {`, which is a syntax error. So the shell plugin stays out of it entirely. Not everyone will hit this, but it's the kind of thing that will bite you at 11pm if you don't know to look for it.
 
@@ -95,7 +95,7 @@ export -f opp
 
 The subshell means the parent environment is untouched. `opp`[^opp] `item list` shows all vaults; `op item list` shows only `Automation`.
 
-**Claude Desktop MCP.** The [1Password MCP server](https://github.com/CakeRepository/1Password-MCP) — a community project, Apache licensed, not affiliated with 1Password — connects Claude Desktop to the vault via the same service account. With it running, Claude Desktop can call `password_read` with an `op://` reference and get the value directly, replacing the markdown file entirely.
+**Claude Desktop MCP.** The [1Password MCP server](https://github.com/CakeRepository/1Password-MCP) (published to npm as [`@takescake/1password-mcp`](https://www.npmjs.com/package/@takescake/1password-mcp) — same project, different handles) — a community project, Apache licensed, not affiliated with 1Password — connects Claude Desktop to the vault via the same service account. With it running, Claude Desktop can call `password_read` with an `op://` reference and get the value directly, replacing the markdown file entirely.
 
 The naive configuration puts the service account token directly in `claude_desktop_config.json` as an env var, which trades one problem (a markdown file with tokens) for a different one (a JSON file with a token in a predictable location, readable by any process with filesystem access — including Claude itself via the filesystem MCP).
 
@@ -126,7 +126,7 @@ The `claude_desktop_config.json` entry becomes:
 
 No `env` block, no token in the file. The config is safe to look at and safe to share.
 
-> **If you get a recurring "bash would like to access data from other apps" prompt**: clicking Allow should persist the decision, but it won't if a previous "Don't Allow" click recorded a hard deny in macOS's [TCC database](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive), or if bash was upgraded via Homebrew since the deny was recorded, leaving a stale entry keyed to the old binary path. Check what's actually recorded:
+> **If you get a recurring "bash would like to access data from other apps" prompt**: clicking Allow should persist the decision, but it won't if a previous "Don't Allow" click recorded a hard deny in macOS's [TCC database](https://www.rainforestqa.com/blog/macos-tcc-db-deep-dive), or if bash was upgraded via Homebrew since the deny was recorded, leaving a stale entry keyed to the old binary path. The user TCC database at `~/Library/Application Support/com.apple.TCC/TCC.db` is user-writable — no SIP bypass needed — but your Terminal (or whatever runs `sqlite3`) needs **Full Disk Access** granted in System Settings → Privacy & Security. Without it, `sqlite3` silently opens the file read-only and the `UPDATE` no-ops with no error. If your fix seems to do nothing, check that first. Check what's actually recorded:
 >
 > ```bash
 > sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
@@ -182,7 +182,7 @@ For anyone following this as a guide, the moving parts in order:
 7. Update per-project `secrets.op` files from `op://Personal/...` to `op://Automation/...`
 8. Create the MCP launcher script at a stable path; point `claude_desktop_config.json` at it with no `env` block
 
-The 1Password CLI documentation lives at [developer.1password.com](https://developer.1password.com/docs/cli/). The MCP server referenced is [CakeRepository/1Password-MCP](https://github.com/CakeRepository/1Password-MCP) — Apache licensed, community maintained, not affiliated with 1Password. My own [`claude-wrapper`](https://github.com/smartwatermelon/claude-wrapper) and [`dotfiles`](https://github.com/smartwatermelon/dotfiles) are public if you want to see how the pieces fit together in context.
+The 1Password CLI documentation lives at [developer.1password.com](https://developer.1password.com/docs/cli/). The MCP server referenced is [CakeRepository/1Password-MCP](https://github.com/CakeRepository/1Password-MCP) on GitHub, published as [`@takescake/1password-mcp`](https://www.npmjs.com/package/@takescake/1password-mcp) on npm — Apache licensed, community maintained, not affiliated with 1Password. My own [`claude-wrapper`](https://github.com/smartwatermelon/claude-wrapper) and [`dotfiles`](https://github.com/smartwatermelon/dotfiles) are public if you want to see how the pieces fit together in context.
 
 ---
 
