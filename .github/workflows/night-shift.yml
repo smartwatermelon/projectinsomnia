@@ -39,6 +39,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: smartwatermelon/ralph-burndown
+          ref: v2.2.0
           path: ralph-burndown
 
       - name: Install uv
@@ -81,6 +82,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: smartwatermelon/ralph-burndown
+          ref: v2.2.0
           path: ralph-burndown
 
       - name: Install uv
