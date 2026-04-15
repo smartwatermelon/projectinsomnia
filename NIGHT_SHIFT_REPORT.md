@@ -1,33 +1,29 @@
-# 🦉 Night Shift Report — 20260408
-**Branch**: `tech-debt/night-shift-20260408`
-**Duration**: 0h 49m
-**Summary**: 3 fixed · 1 blocked · 0 skipped
+# 🦉 Night Shift Report — 20260415
+**Branch**: `tech-debt/night-shift-20260415`
+**Duration**: 0h 2m
+**Summary**: 1 fixed · 0 blocked · 1 skipped
 
 ---
 
-## ✅ Completed (3)
+## ✅ Completed (1)
 
 | # | What changed |
 |---|---|
-| #34 | Updated CLAUDE.md File Paths section to reference docs/SPEC.md and docs/BACKLOG.md instead of the incorrect root-level paths; verified with markdownlint and npm run build. |
-| #15 | Updated the comment in netlify/functions/instagram-webhook.mts to explicitly document that IFTTT's <<<>>> syntax applies JSON string encoding (escaping " as \"), verified via npm run build succeeding. |
-| #10 | added refresh_token detection in strava-feed.mts to log a warning when Strava issues a new refresh token that differs from the stored env var, verified with npm run build |
+| #48 | added isMetaTag(t: string): boolean helper to src/lib/metaTags.ts and replaced all three (metaTags as readonly string[]).includes(t) casts in index.astro and PostLayout.astro; build passes |
 
 ---
 
-## ⛔ Blocked (1)
+## ⛔ Blocked (0)
+
+_No blocked issues._
+
+---
+
+## ⏭ Skipped (1)
 
 | # | Reason |
 |---|---|
-| #12 | ralph subshell failed (non-zero exit without sentinel) |
-
-Each blocked issue has been commented automatically with the agent's findings.
-
----
-
-## ⏭ Skipped (0)
-
-_No issues skipped._
+| #42 | issue #42 is already resolved — metaTags array is already extracted to src/lib/metaTags.ts and both PostLayout.astro and blog/index.astro import isMetaTag from it |
 
 ---
 
