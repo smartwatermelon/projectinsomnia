@@ -1,11 +1,9 @@
-## Issue #10 — Strava refresh token rotation warning
+## Attempt 1 — 2026-04-15
 
-**Attempt 1 (complete)**
+**Issue #48:** Add `isMetaTag(t: string): boolean` helper to `src/lib/metaTags.ts` to eliminate repeated `(metaTags as readonly string[]).includes(t)` casts at 3 call sites.
 
-Issue: `strava-feed.mts` only extracted `access_token` from the token refresh response, silently discarding any new `refresh_token` Strava might issue.
+**What I tried:** Added the helper to `metaTags.ts`, updated imports in `src/pages/blog/index.astro` and `src/layouts/PostLayout.astro` to use `isMetaTag` instead of the inline cast.
 
-Fix: Destructured `refresh_token` from the response and added a `console.warn` when the returned refresh token differs from the env var. This is a lightweight early-warning signal as requested in the issue.
+**Result:** Build succeeded. All 3 call sites now use `isMetaTag(t)`.
 
-Build: `npm run build` — passed clean.
-
-Result: wrote `done:` to `.ralph/agent/pr_ready`.
+**Status:** Done.

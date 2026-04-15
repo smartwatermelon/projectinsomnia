@@ -1,0 +1,1 @@
+done: added isMetaTag(t: string): boolean helper to src/lib/metaTags.ts and replaced all three (metaTags as readonly string[]).includes(t) casts in index.astro and PostLayout.astro; build passes
