@@ -1,0 +1,1 @@
+skip: issue #42 is already resolved — metaTags array is already extracted to src/lib/metaTags.ts and both PostLayout.astro and blog/index.astro import isMetaTag from it
