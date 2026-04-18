@@ -36,7 +36,7 @@ jobs:
 
     steps:
       - name: Checkout ralph-burndown
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: smartwatermelon/ralph-burndown
           ref: v2.2.0
@@ -73,13 +73,13 @@ jobs:
 
     steps:
       - name: Checkout projectinsomnia
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
           path: projectinsomnia
 
       - name: Checkout ralph-burndown
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: smartwatermelon/ralph-burndown
           ref: v2.2.0
