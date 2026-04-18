@@ -43,7 +43,7 @@ jobs:
           path: ralph-burndown
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
 
       - name: Install claude CLI
         run: npm install -g @anthropic-ai/claude-code
@@ -86,7 +86,7 @@ jobs:
           path: ralph-burndown
 
       - name: Install uv
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
 
       - name: Install ralph-orchestrator
         env:
