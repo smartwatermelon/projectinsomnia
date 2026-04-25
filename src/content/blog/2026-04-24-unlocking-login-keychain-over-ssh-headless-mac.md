@@ -226,6 +226,71 @@ The master ssh connection persists for the session duration plus sixty seconds a
 
 ---
 
+## Postscript: The Preboot Trap
+
+After shipping the wrapper described above, a new failure mode surfaced — one we'd never tested for. We didn't try "ssh into a freshly-rebooted Mac mini" while developing this, and the preboot SSH phase that lives in that window had been there the whole time.
+
+### The Trigger
+
+macOS Tahoe (26.0+) on Apple Silicon introduced **remote FileVault unlock over SSH**. After a reboot, before any user has logged in, the Mac boots its sealed, read-only system partition and runs a minimal `sshd` from there. That `sshd`:
+
+- accepts only **password authentication** (no SSH keys, no `~/.ssh/config`, no host keys from the data volume — those live on the encrypted partition that hasn't been mounted yet)
+- exists only to authenticate a local user's password and unlock the data volume
+- **drops the connection** seconds after a successful password, while macOS finishes booting and starts the real `sshd`
+
+Apple's design here is also intentional and correct. The wrapper just didn't know about it.
+
+### What Went Wrong
+
+The keychain-unlock dance opens an auxiliary `ssh -fNM` master before the user's interactive session, then pipes `unlock-keychain` over that master via `security -i`. Both steps assume the master will live long enough for the user's session to multiplex over it.
+
+In the FileVault preboot phase, neither assumption holds:
+
+1. The auxiliary master attempts key auth, falls back to password, and **prompts the user on `/dev/tty`** for the FileVault password. The user wasn't asking to interact with this connection — it was supposed to be invisible plumbing.
+2. Even if the user types the password, the preboot `sshd` unlocks the volume and then immediately disconnects. The "master" is a corpse before the user's real session can attach to it.
+
+The user's experience was a confusing double-prompt: first for an SSH connection they didn't ask to authenticate, then a `^C` and a stderr warning, then the actual session prompt they wanted in the first place.
+
+### The Fix
+
+Two flags on the auxiliary master invocation:
+
+```bash
+ssh -fNM \
+  -o ControlPath="${sock}" -o ControlPersist=60 \
+  -o BatchMode=yes -o ConnectTimeout=10 \
+  "${host}"
+```
+
+`BatchMode=yes` refuses every interactive auth method — passwords, keyboard-interactive, host-key confirmation, all of it. In the preboot phase, where only password auth is offered, the master fails fast with no `/dev/tty` access. The wrapper logs a warning, cleans up its socket, and falls through to a plain `exec ssh "$@"` — which inherits no flags and lets the user's real session prompt for the FileVault password as macOS intends.
+
+`ConnectTimeout=10` caps the master at ten seconds so partially-booted hosts (TCP up, `sshd` hung on banner) don't stall the wrapper indefinitely. The user's interactive session has no such cap; it gets the kernel's default TCP timeout, which is the right behavior for a session the user is actively waiting on.
+
+### A New Scope Limitation
+
+`BatchMode=yes` is the *correct* gate for the preboot case, but it gates more than the preboot case. Any host that legitimately accepts only password or keyboard-interactive auth — a freshly-provisioned box, a server with PAM 2FA, a Yubico challenge — now silently fails the master-open step. The keychain-unlock dance is skipped on those hosts. The fall-through is harmless (the user's session still works), but the convenience is gone until key authentication is in place.
+
+This is acceptable for the original use case (a personal Mac mini where keys are deployed once and forever), but worth flagging for anyone porting the design. A more general implementation might add a per-host opt-out — `# op-keychain-allow-password: yes` — to permit the master to take a password when the operator explicitly accepts the UX cost. For now, the simpler gate keeps the failure mode legible: if you don't have key auth on the host, the wrapper will not surprise you with a prompt.
+
+### Updated Security Invariants
+
+The invariants above all still hold. One can be added:
+
+- The wrapper never holds open an interactive prompt on `/dev/tty` for a connection the user did not initiate.
+
+That invariant was implicit before — accidentally satisfied by the assumption that key authentication would always succeed. The preboot case made it explicit.
+
+### Recap
+
+- macOS Tahoe added a preboot SSH phase that accepts only passwords and disconnects after FileVault unlock.
+- The wrapper's auxiliary master collided with this state by prompting for a password the user didn't want to enter and then dying anyway.
+- `BatchMode=yes` + `ConnectTimeout=10` on the master invocation pushes the failure to a fast, silent, no-`tty` exit, and the wrapper falls through to the plain SSH path that handles the preboot unlock correctly.
+- The tradeoff — losing the convenience on password-only hosts — is acceptable for the design's intended scope.
+
+The fix is a five-token diff. The reasoning behind it is the rest of this postscript.
+
+---
+
 If you're an employer and you're thinking *I want someone who reasons about where a secret travels this carefully* — [I'm on LinkedIn](https://www.linkedin.com/in/andrewrich/) and [reachable by email](mailto:andrew@projectinsomnia.com). I'm a Principal SRE by trade, and this is the kind of work I do for fun.
 
 If you're a business owner thinking *I have a Mac that should be doing real work for me but keeps fighting me the moment no one is sitting in front of it* — that's exactly what [Night Owl Studio](https://nightowlstudio.us/) is for. Automation on top of macOS, done by someone who's already fought every prompt, permission, and policy so you don't have to.
