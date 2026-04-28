@@ -2,7 +2,7 @@
 title: "Unlocking the Login Keychain Over SSH on a Headless Mac"
 date: 2026-04-24
 description: "macOS locks the login keychain when there's no GUI login, which quietly breaks Claude Code, git credential helpers, and anything that calls SecKeychainFindGenericPassword. The fix: 1Password on the client, ssh connection multiplexing, and `security -i` on the remote — no password in argv, on disk, or in env on either side."
-tags: ["tech", "security", "macos", "ssh", "1password"]
+tags: ["pinned", "tech", "security", "macos", "ssh", "1password"]
 ---
 
 ## The Broken Thing
