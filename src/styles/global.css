@@ -184,6 +184,15 @@ hr {
   margin: 2rem 0;
 }
 
+/* Components — Pinned Posts Section
+   ---------------------------------------------------------- */
+.pinned-posts {
+  margin-bottom: 2.5rem;
+}
+.pinned-posts h2 {
+  margin-top: 0;
+}
+
 /* Components — Post List
    ---------------------------------------------------------- */
 .post-list {
