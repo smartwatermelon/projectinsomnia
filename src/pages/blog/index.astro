@@ -64,8 +64,7 @@ const remaining = showPinnedSection
   </div>
 
   {showPinnedSection && pinned.length > 0 && (
-    <section class="pinned-posts">
-      <h2>Pinned</h2>
+    <section class="pinned-posts" aria-label="Pinned posts">
       <ul class="post-list">
         {pinned.map(post => {
           const slug = slugFromId(post.id);

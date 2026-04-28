@@ -187,10 +187,17 @@ hr {
 /* Components — Pinned Posts Section
    ---------------------------------------------------------- */
 .pinned-posts {
+  background: var(--color-surface);
+  border-radius: 4px;
+  padding: 1rem 1.25rem;
   margin-bottom: 2.5rem;
 }
 .pinned-posts h2 {
   margin-top: 0;
+}
+.pinned-posts .post-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 /* Components — Post List
