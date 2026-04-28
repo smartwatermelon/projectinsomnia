@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import { slugFromId } from '../../lib/slugFromId';
-import { isMetaTag } from '../../lib/metaTags';
+import { isMetaTag, isPinned } from '../../lib/metaTags';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 export const prerender = false;
@@ -34,9 +34,15 @@ function tagSize(count: number): string {
 
 // Filter by active tag
 const activeTag = Astro.url.searchParams.get('tag');
-const posts = activeTag
+const filtered = activeTag
   ? allPosts.filter(p => (p.data.tags ?? []).includes(activeTag))
   : allPosts;
+
+const showPinnedSection = !activeTag;
+const pinned = showPinnedSection ? allPosts.filter(isPinned) : [];
+const remaining = showPinnedSection
+  ? filtered.filter(p => !isPinned(p))
+  : filtered;
 ---
 
 <BaseLayout title={activeTag ? `Blog — #${activeTag}` : 'Blog'}>
@@ -57,6 +63,32 @@ const posts = activeTag
     ))}
   </div>
 
+  {showPinnedSection && pinned.length > 0 && (
+    <section class="pinned-posts" aria-label="Pinned posts">
+      <ul class="post-list">
+        {pinned.map(post => {
+          const slug = slugFromId(post.id);
+          return (
+            <li>
+              <a href={`/blog/${slug}/`}>{post.data.title}</a>
+              <div class="post-meta">
+                <time datetime={post.data.date.toISOString()}>
+                  {post.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
+                </time>
+                {(post.data.tags ?? [])
+                  .filter(t => !isMetaTag(t))
+                  .map(tag => (
+                    <a href={`/blog/?tag=${encodeURIComponent(tag)}`} class="tag">{tag}</a>
+                  ))
+                }
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  )}
+
   {activeTag && (
     <div class="tag-filter-status">
       Showing posts tagged <strong>{activeTag}</strong>
@@ -64,12 +96,12 @@ const posts = activeTag
     </div>
   )}
 
-  {activeTag && posts.length === 0 && (
+  {activeTag && remaining.length === 0 && (
     <p class="empty-state">No posts tagged <strong>{activeTag}</strong>.</p>
   )}
 
   <ul class="post-list">
-    {posts.map(post => {
+    {remaining.map(post => {
       const slug = slugFromId(post.id);
       return (
         <li>

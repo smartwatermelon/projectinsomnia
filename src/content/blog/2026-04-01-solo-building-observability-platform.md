@@ -2,7 +2,7 @@
 title: "I Solo-Built a Production Observability Platform. Then I Got Laid Off by Email."
 date: 2026-04-01
 description: "How one sentence of requirements became a full-stack data platform — Python, FastAPI, Streamlit, SQLite, Kubernetes — built solo over 5 months at Oracle Health. Then 30,000 of us got the same email."
-tags: ["python", "kubernetes", "sqlite", "fastapi", "streamlit", "oracle"]
+tags: ["pinned", "python", "kubernetes", "sqlite", "fastapi", "streamlit", "oracle"]
 ---
 
 Last week I was part of Oracle's widely-reported reduction of approximately 30,000 positions. I got the news the same way everyone else did: by email. This is a project I built during my time there — a [Principal SRE](https://www.linkedin.com/in/andrewrich/) working solo on something that started with a single sentence and grew into a production platform processing over 11 million records.
