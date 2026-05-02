@@ -6,6 +6,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   <h1>Projects</h1>
 
+  <p class="focus">What I'm working on right now: backend build system improvements to <a href="https://kebab.tax">Kebab Tax</a>, and the unglamorous fleet plumbing (Claude-as-PR-reviewer, autonomous tech-debt PRs, shared workflows across a dozen repos, security hardening on all of it) that makes everything else cheaper. Reliquarist is next.</p>
+
   <div class="projects-grid">
 
     <!-- LEFT COLUMN: Products & Client Work -->
@@ -24,10 +26,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         </div>
 
         <div class="project">
-          <h3>Yesteryear <span class="badge badge--soon">Coming soon</span></h3>
+          <h3>Reliquarist <span class="badge badge--soon">Coming soon</span></h3>
           <p class="project-meta">Night Owl Studio, LLC — iOS</p>
           <p>A memory app that surfaces what you were doing on this day in past years.
-          Replaces Timehop. Pulls from your own data sources — posts, photos, workouts —
+          Replaces Timehop. Pulls from your own data sources (posts, photos, workouts)
           and keeps everything local.</p>
         </div>
 
@@ -41,27 +43,25 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <h2>Client Work</h2>
 
         <div class="project">
-          <h3><a href="https://tnjcleaning.com">T&amp;J Cleaning</a> <span class="badge">Web</span></h3>
-          <p class="project-meta">Night Owl Studio, LLC — 2025</p>
-          <p>A Spokane-area residential cleaning service with four years in business and
-          a 4.9-star Thumbtack rating — but no web presence. Built them a clean,
-          fast, single-page site with a contact form and photo gallery, replacing a
-          Thumbtack listing that charged them for every inquiry whether it converted or not.</p>
-        </div>
-
-        <!-- Amelia Boone — uncomment when client is ready to announce
-        <div class="project">
-          <h3>Amelia Boone <span class="badge badge--soon">In progress</span></h3>
+          <h3><a href="https://ameliabooneracing.com">Amelia Boone</a> <span class="badge">Web</span></h3>
           <p class="project-meta">Night Owl Studio, LLC — 2026</p>
           <p>Site migration and rebuild for obstacle racing champion and ultrarunner
           Amelia Boone. Consolidating a WordPress archive (125 posts, 2011–2023) and
           an active Substack into a single Astro-based site.</p>
         </div>
-        -->
+
+        <div class="project">
+          <h3><a href="https://tnjcleaning.com">T&amp;J Cleaning</a> <span class="badge">Web</span></h3>
+          <p class="project-meta">Night Owl Studio, LLC — 2025</p>
+          <p>A Spokane-area residential cleaning service with four years in business and
+          a 4.9-star Thumbtack rating, but no web presence. Built them a clean,
+          fast, single-page site with a contact form and photo gallery, replacing a
+          Thumbtack listing that charged them for every inquiry whether it converted or not.</p>
+        </div>
 
         <div class="project">
           <h3>Freelance</h3>
-          <p>Résumé writing and editing, website builds and migrations.
+          <p>Custom cross-platform apps, website builds and migrations, résumé and LinkedIn consulting.
           <a href="mailto:andrew@nightowlstudio.us">andrew@nightowlstudio.us</a></p>
         </div>
       </section>
@@ -71,7 +71,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <!-- RIGHT COLUMN: GitHub Repos -->
     <div class="projects-repos">
       <h2>Open Source</h2>
-      <p class="repos-intro">Public repos on <a href="https://github.com/smartwatermelon">GitHub</a>.
+      <p class="repos-intro">Public repos under
+      <a href="https://github.com/smartwatermelon">smartwatermelon</a> and
+      <a href="https://github.com/nightowlstudiollc">nightowlstudiollc</a> on GitHub.
       Mostly tools I built because I needed them.</p>
 
       <section class="repo-group">
@@ -84,44 +86,44 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </li>
           <li>
             <a href="https://github.com/smartwatermelon/claude-config">claude-config</a>
-            <p>My personal Claude Code CLI configuration — hooks, scripts, and
+            <p>My personal Claude Code CLI configuration: hooks, scripts, and
             the accumulated settings of someone who lives in this tool.</p>
           </li>
           <li>
-            <a href="https://github.com/smartwatermelon/agents">agents</a>
-            <p>Intelligent automation and multi-agent orchestration patterns for Claude Code.</p>
+            <a href="https://github.com/smartwatermelon/ralph-burndown">ralph-burndown</a>
+            <p>Nightly tech-debt scheduler. Picks a repo, picks a backlog item tagged
+            <code>tech-debt</code>, runs Claude on it in a clean checkout, opens a PR.
+            Bin-packs by estimated cost so one slow repo can't starve the others.</p>
           </li>
           <li>
-            <a href="https://github.com/smartwatermelon/headroom">headroom</a>
-            <p>A context optimization layer for LLM applications.</p>
+            <a href="https://github.com/smartwatermelon/slack-mcp">slack-mcp</a>
+            <p>Model Context Protocol server that lets Claude Code read and post to Slack.</p>
           </li>
           <li>
             <a href="https://github.com/smartwatermelon/smartwatermelon-marketplace">smartwatermelon-marketplace</a>
             <p>A marketplace of Claude Code CLI plugins.</p>
           </li>
+          <li>
+            <a href="https://github.com/nightowlstudiollc/networth-agent">nightowlstudiollc/networth-agent</a>
+            <p>AI-assisted net worth tracker. Pulls account balances via Plaid, logs
+            them, and lets Claude reason over the history.</p>
+          </li>
         </ul>
       </section>
 
       <section class="repo-group">
-        <h3>macOS &amp; Infrastructure</h3>
+        <h3>Fleet &amp; CI Tooling</h3>
         <ul class="repo-list">
           <li>
-            <a href="https://github.com/smartwatermelon/mac-server-setup">mac-server-setup</a>
-            <p>Automated setup framework for Apple Silicon Mac Minis as home servers:
-            native macOS apps, per-user SMB mounting, security hardening.</p>
+            <a href="https://github.com/smartwatermelon/github-workflows">github-workflows</a>
+            <p>Reusable GitHub Actions workflows, including <code>claude-blocking-review</code>:
+            Claude Code as a blocking PR reviewer with chunked diff handling and PASS-comment
+            auto-collapse.</p>
           </li>
           <li>
-            <a href="https://github.com/smartwatermelon/swift-progress-indicator">swift-progress-indicator</a>
-            <p>Lightweight native macOS progress indicator that reads log files
-            in real time. No special permissions, no UX crimes.</p>
-          </li>
-          <li>
-            <a href="https://github.com/smartwatermelon/archive-resolver">archive-resolver</a>
-            <p>macOS DNS resolver override for archive.today.</p>
-          </li>
-          <li>
-            <a href="https://github.com/smartwatermelon/transmission-filebot">transmission-filebot</a>
-            <p>Automated media processing scripts for Transmission downloads with Plex integration.</p>
+            <a href="https://github.com/smartwatermelon/dev-env">dev-env</a>
+            <p>Specifications, standards, and reference documentation for the studio.
+            The audit checklists I actually run on a new repo, instead of vaguely intending to.</p>
           </li>
           <li>
             <a href="https://github.com/smartwatermelon/homebrew-tap">homebrew-tap</a>
@@ -131,21 +133,71 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </section>
 
       <section class="repo-group">
-        <h3>Utilities &amp; Miscellany</h3>
+        <h3>macOS &amp; Infrastructure</h3>
         <ul class="repo-list">
           <li>
-            <a href="https://github.com/smartwatermelon/github-workflows">github-workflows</a>
-            <p>Reusable GitHub Actions workflows you can import into your own repos.</p>
+            <a href="https://github.com/smartwatermelon/mac-dev-server-setup">mac-dev-server-setup</a>
+            <p>Automated setup for Apple Silicon Mac Minis as development and build
+            servers: LaunchDaemons, FileVault preboot SSH, boot-time automount of
+            external SSDs.</p>
           </li>
           <li>
-            <a href="https://github.com/smartwatermelon/pre-commit-testing">pre-commit-testing</a>
-            <p>Comprehensive test suite for pre-commit hooks: clean files, auto-fixable
-            issues, non-fixable errors across multiple file types.</p>
+            <a href="https://github.com/smartwatermelon/mac-server-setup">mac-server-setup</a>
+            <p>Automated setup framework for Apple Silicon Mac Minis as media servers:
+            native macOS apps, per-user SMB mounting, security hardening. Shares
+            deployment tooling with mac-dev-server-setup.</p>
           </li>
           <li>
-            <a href="https://github.com/smartwatermelon/anniversary">anniversary</a>
-            <p>Anniversary activity selector. Archived; no updates needed. Might be
-            useful to someone.</p>
+            <a href="https://github.com/smartwatermelon/swift-progress-indicator">swift-progress-indicator</a>
+            <p>Lightweight native macOS progress indicator that reads log files
+            in real time. No special permissions, no UX crimes.</p>
+          </li>
+          <li>
+            <a href="https://github.com/smartwatermelon/lock-sync">lock-sync</a>
+            <p>Auto-locks Synergy-connected Mac clients when the server locks.
+            Closes a gap KVM software left open.</p>
+          </li>
+          <li>
+            <a href="https://github.com/smartwatermelon/archive-resolver">archive-resolver</a>
+            <p>macOS DNS resolver override for archive.today.</p>
+          </li>
+          <li>
+            <a href="https://github.com/nightowlstudiollc/vpn-lan-bridge">nightowlstudiollc/vpn-lan-bridge</a>
+            <p>Maintains local network connectivity when your VPN captures the
+            default route and otherwise hides the LAN from you.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="repo-group">
+        <h3>Web &amp; Sites</h3>
+        <ul class="repo-list">
+          <li>
+            <a href="https://github.com/smartwatermelon/projectinsomnia">projectinsomnia</a>
+            <p>Source for this blog. Astro, Netlify, opinionated about prose.</p>
+          </li>
+          <li>
+            <a href="https://github.com/nightowlstudiollc/amelia-boone">nightowlstudiollc/amelia-boone</a>
+            <p>Migration source for the Amelia Boone site rebuild.</p>
+          </li>
+          <li>
+            <a href="https://github.com/nightowlstudiollc/tnjcleaning">nightowlstudiollc/tnjcleaning</a>
+            <p>Netlify deploy source for tnjcleaning.com.</p>
+          </li>
+        </ul>
+      </section>
+
+      <section class="repo-group">
+        <h3>Misc</h3>
+        <ul class="repo-list">
+          <li>
+            <a href="https://github.com/smartwatermelon/dotfiles">dotfiles</a>
+            <p>Unified dotfiles. Mostly so I can stand up a new Mac fast.</p>
+          </li>
+          <li>
+            <a href="https://github.com/smartwatermelon/spokane-snow">spokane-snow</a>
+            <p>A visualization of early and late snowfall in Spokane. Mostly an excuse
+            to play with the data.</p>
           </li>
         </ul>
       </section>
@@ -184,6 +236,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     .projects-grid {
       grid-template-columns: 1fr;
     }
+  }
+
+  .focus {
+    color: var(--color-muted);
+    border-left: 3px solid var(--color-accent);
+    padding-left: 1rem;
+    margin: 0 0 2.5rem;
+    font-size: 0.95rem;
   }
 
   .project-group,
