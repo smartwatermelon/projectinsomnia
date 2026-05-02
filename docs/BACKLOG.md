@@ -58,18 +58,18 @@ Candidates for additional feeds when there's demand:
 
 ---
 
-## Yesteryear Integration
+## Reliquarist Integration
 
-### /then as Yesteryear proof of concept
+### /then as Reliquarist proof of concept
 
-The /then page and the Yesteryear app should share the same underlying
+The /then page and the Reliquarist app should share the same underlying
 data model and logic — not diverge into two separate implementations.
 
 Being intentional about this now means:
 
-- /then becomes a live demo of the Yesteryear concept in a browser
-- If Yesteryear ever supports web, projectinsomnia.com/then is the scaffold
-- Data sources added to /then (posts, photos, Strava) feed Yesteryear too
+- /then becomes a live demo of the Reliquarist concept in a browser
+- If Reliquarist ever supports web, projectinsomnia.com/then is the scaffold
+- Data sources added to /then (posts, photos, Strava) feed Reliquarist too
 
 Keep the data model clean and source-agnostic from the start.
 

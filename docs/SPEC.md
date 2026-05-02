@@ -18,7 +18,7 @@ who finds a post via search.
 
 **Night Owl Studio connection**: Andrew runs Night Owl Studio LLC
 (nightowlstudio.us), a solo app development business. This site promotes
-that work and will serve as a proof-of-concept for Yesteryear, an upcoming
+that work and will serve as a proof-of-concept for Reliquarist, an upcoming
 app.
 
 ---
@@ -149,19 +149,22 @@ Complete. Two-column layout: left = Night Owl Studio products + client work;
 right = grouped open source repos.
 
 **Left column — Night Owl Studio:** Kebab (iOS & Android, launched Dec 2025),
-Yesteryear (coming soon), Crazy Larry's Used Spaceships, freelance CTA.
+Reliquarist (coming soon), Crazy Larry's Used Spaceships, freelance CTA.
 
-**Left column — Client work:** T&J Cleaning (tnjcleaning.com), Amelia Boone
-(commented out pending client announcement — search for the comment to re-enable),
-freelance CTA.
+**Left column — Client work:** Amelia Boone (ameliabooneracing.com), T&J Cleaning
+(tnjcleaning.com), freelance CTA.
 
 **Right column — GitHub repos, grouped:**
 
-- AI & Claude Code: claude-wrapper, claude-config, agents, headroom,
-  smartwatermelon-marketplace
-- macOS & Infrastructure: mac-server-setup, swift-progress-indicator,
-  archive-resolver, transmission-filebot, homebrew-tap
-- Utilities & Miscellany: github-workflows, pre-commit-testing, anniversary
+- AI & Claude Code: claude-wrapper, claude-config, ralph-burndown, slack-mcp,
+  smartwatermelon-marketplace, nightowlstudiollc/networth-agent
+- Fleet & CI Tooling: github-workflows, dev-env, homebrew-tap
+- macOS & Infrastructure: mac-dev-server-setup, mac-server-setup,
+  swift-progress-indicator, lock-sync, archive-resolver,
+  nightowlstudiollc/vpn-lan-bridge
+- Web & Sites: projectinsomnia, nightowlstudiollc/amelia-boone,
+  nightowlstudiollc/tnjcleaning
+- Misc: dotfiles, spokane-snow
 - Interview Projects (own section, with explanatory note): sailpoint-sre,
   beam-sre-kata
 
@@ -205,11 +208,6 @@ Point `projectinsomnia.com` at Netlify. Prerequisites are now met
 
 See BACKLOG.md for full spec. Build after DNS cutover.
 
-### 4. Amelia Boone project entry
-
-Commented out in `projects.astro`. Uncomment when client is ready to announce.
-Search for: `Amelia Boone — uncomment when client is ready to announce`
-
 ---
 
 ## Backlog (not immediate, not forgotten)
@@ -218,7 +216,7 @@ Full details in `BACKLOG.md` in the repo root. Summary:
 
 **`/then` page — "on this day"**: Query blog collection for posts where
 month+day matches today. Display as retrospective. Filter out ouatrevisit
-and elections. This is intentionally connected to the Yesteryear app concept —
+and elections. This is intentionally connected to the Reliquarist app concept —
 keep the data model source-agnostic so the same logic can power both.
 
 **Image localization**: Medium CDN images work now but are fragile. True fix
