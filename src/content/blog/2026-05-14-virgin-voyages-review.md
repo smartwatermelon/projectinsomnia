@@ -149,6 +149,16 @@ Virgin Voyages made us want to cruise again. Ask me how the next one goes.
 
 ---
 
+## Addendum: special diets (May 15, 2026)
+
+I should have included this in the dining section. I'm a "nonmammaltarian," which is a word I made up because no real dietary label covers "everything except mammals." No beef, pork, lamb. Chicken, fish, and shellfish are fine. It's a weird enough restriction that most cruise dining rooms handle it by accident (order the chicken) or not at all (everything interesting tonight has bacon in it).
+
+VV handled it on purpose. Every restaurant had chicken, Impossible, and veggie options that weren't afterthoughts. I travel with vegetarian and vegan friends, and they had entire menu sections with options clearly called out. Not the usual "a mushroom pasta dish or a sad salad." The food service team had obviously thought through every menu for people who don't eat the default.
+
+If you have dietary restrictions and you've spent years quietly scanning cruise menus for the one thing you can order, this is worth knowing about.
+
+---
+
 ## One more thing
 
 This trip and most of our 11 Disney cruises were booked through our travel agent, **Mary Kraemer** at [Masterpiece Travels](https://www.masterpiecetravels.com). Mary is an ECC and LCS, which are industry certifications that mean she actually knows what she's doing rather than just reselling a website. She's been putting up with our indecisiveness, last-minute changes, and cabin-location opinions for years. If you're considering a cruise of any kind, talk to a good travel agent. Booking direct saves you nothing and costs you a professional advocate when things go sideways.
