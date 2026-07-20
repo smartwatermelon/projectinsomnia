@@ -5,7 +5,7 @@ description: "One finish, then five straight races I didn't complete. Why I'm re
 tags: ["triathlon", "ironman", "mental-health", "racing"]
 ---
 
-I completed IRONMAN 70.3 Oregon in 2022. I have not finished a long-course triathlon since.
+IRONMAN 70.3 Oregon in 2022 was my fourth 70.3 finish, and by then I'd already completed a full IRONMAN (Arizona 140.6, in 2018). I have not finished a long-course triathlon since.
 
 Victoria, 2023: a bike mechanical, then I hit the run cutoff. Arizona, 2023: I DNFed on the run, in the second half, in heat I still believe should have ended the race. Washington Tri-Cities, 2024: withdrew before the start. La Quinta, 2025: withdrew before the start. Oregon, 2026: withdrew the morning of the race, before transition even opened.
 
@@ -37,7 +37,7 @@ Friday we drove from Spokane to Salem, left at 6am and got in at 2pm because of 
 
 ![A signboard at athlete check-in reading "PLEASE HAVE YOUR QR CODE READY"](/images/blog/five-races-checkin-qr-sign.jpg)
 
-![The IRONMAN event shirt printed with athletes' names, mine — Andrew Rich — in the center](/images/blog/five-races-name-shirt.jpg)
+![The IRONMAN event shirt printed with athletes' names, mine (Andrew Rich) in the center](/images/blog/five-races-name-shirt.jpg)
 
 Saturday morning was an 8-mile shakeout ride, my first real ride in longer than I want to say, and it went fine, because that kind of thing doesn't fully leave you. Back to Playtri to adjust the front disc, athlete briefing, bike checked into transition, back to the hotel to lay out my gear the way I've laid out gear for fifteen years. Early dinner, bed, alarm set for 3:30am.
 
