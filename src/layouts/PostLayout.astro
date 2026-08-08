@@ -45,6 +45,9 @@ const back = backLinks[collection];
           Originally published on <a href={mediumUrl} rel="noopener noreferrer" target="_blank">Medium</a>.
         </p>
       )}
+      <button type="button" id="share-button" class="share-button" data-title={title} hidden>
+        Share
+      </button>
     </header>
 
     <div class="prose">
@@ -52,6 +55,49 @@ const back = backLinks[collection];
     </div>
   </article>
 </BaseLayout>
+
+<script>
+  function initShareButton(): void {
+    const button = document.getElementById('share-button') as HTMLButtonElement | null;
+    if (!button) return;
+
+    const canNativeShare = typeof navigator.share === 'function';
+    // Show the button whenever we have some way to share: native share sheet,
+    // or the clipboard fallback.
+    if (!canNativeShare && typeof navigator.clipboard?.writeText !== 'function') return;
+    button.hidden = false;
+
+    const label = button.textContent?.trim() ?? 'Share';
+
+    button.addEventListener('click', async () => {
+      const shareData = {
+        title: button.dataset.title ?? document.title,
+        url: window.location.href,
+      };
+
+      if (canNativeShare) {
+        try {
+          await navigator.share(shareData);
+          return;
+        } catch (err) {
+          // AbortError means the user cancelled the share sheet — do nothing.
+          if (err instanceof Error && err.name === 'AbortError') return;
+          // Otherwise fall through to the clipboard fallback below.
+        }
+      }
+
+      try {
+        await navigator.clipboard.writeText(shareData.url);
+        button.textContent = 'Link copied!';
+        setTimeout(() => { button.textContent = label; }, 2000);
+      } catch {
+        // Clipboard write failed (e.g. permissions) — leave the button as-is.
+      }
+    });
+  }
+
+  initShareButton();
+</script>
 
 <style>
   .post-header {
@@ -85,6 +131,24 @@ const back = backLinks[collection];
     margin-top: 0.75rem;
     font-size: 0.85rem;
     color: var(--color-muted);
+  }
+
+  .share-button {
+    display: inline-block;
+    margin-top: 1rem;
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    padding: 0.35em 0.8em;
+    color: var(--color-muted);
+    cursor: pointer;
+  }
+
+  .share-button:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
   }
 
   .prose { line-height: 1.8; }
