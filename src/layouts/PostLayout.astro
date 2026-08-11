@@ -68,6 +68,7 @@ const back = backLinks[collection];
     button.hidden = false;
 
     const label = button.textContent?.trim() ?? 'Share';
+    let resetTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
     button.addEventListener('click', async () => {
       const shareData = {
@@ -88,8 +89,9 @@ const back = backLinks[collection];
 
       try {
         await navigator.clipboard.writeText(shareData.url);
+        clearTimeout(resetTimeoutId);
         button.textContent = 'Link copied!';
-        setTimeout(() => { button.textContent = label; }, 2000);
+        resetTimeoutId = setTimeout(() => { button.textContent = label; }, 2000);
       } catch {
         // Clipboard write failed (e.g. permissions) — leave the button as-is.
       }
