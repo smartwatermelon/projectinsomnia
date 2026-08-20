@@ -2,6 +2,11 @@
   command = "npm run build"
   publish = "dist"
 
+[build.environment]
+  # Keep in sync with .nvmrc and package.json engines.
+  # Astro 7 requires >=22.12.0; 24 is the active LTS.
+  NODE_VERSION = "24"
+
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
