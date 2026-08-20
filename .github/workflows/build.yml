@@ -1,0 +1,47 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build site
+        # Tee so the log can be inspected for warnings that do not affect
+        # the exit code. pipefail is on by default in GitHub's bash shell,
+        # so a real build failure still fails this step.
+        run: npm run build 2>&1 | tee build.log
+
+      - name: Verify build output
+        # The build exiting 0 is not sufficient: Astro reports empty content
+        # collections as a warning. See issue #121.
+        run: scripts/verify-build-output.sh build.log
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5
+        with:
+          name: build-log
+          path: build.log
+          retention-days: 7
