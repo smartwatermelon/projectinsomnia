@@ -35,6 +35,17 @@ if [[ ! -f "${BASELINE_DOC}" ]]; then
   exit 1
 fi
 
+# Exactly one delimited block, or the parse is ambiguous. Duplicated markers
+# would silently yield a doubled list -- the same kind of unnoticed config
+# drift this check exists to prevent.
+BEGIN_COUNT=$(grep -c 'BEGIN ACCEPTED-BASELINE' "${BASELINE_DOC}" || true)
+END_COUNT=$(grep -c 'END ACCEPTED-BASELINE' "${BASELINE_DOC}" || true)
+if [[ "${BEGIN_COUNT}" != "1" || "${END_COUNT}" != "1" ]]; then
+  echo "❌ ${BASELINE_DOC} must contain exactly one ACCEPTED-BASELINE block"
+  echo "     found ${BEGIN_COUNT} BEGIN marker(s), ${END_COUNT} END marker(s)"
+  exit 1
+fi
+
 BASELINE_BLOCK=$(sed -n '/BEGIN ACCEPTED-BASELINE/,/END ACCEPTED-BASELINE/p' "${BASELINE_DOC}" \
   | grep -E '^(root|chain)[[:space:]]+' || true)
 
