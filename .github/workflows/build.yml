@@ -45,3 +45,64 @@ jobs:
           name: build-log
           path: build.log
           retention-days: 7
+
+  # Netlify builds the deploy preview independently of this workflow, so wait
+  # for the commit status it posts, then exercise the site it actually served.
+  # This covers what a dist/ inspection structurally cannot: the SSR route,
+  # the adapter, and real HTTP routing.
+  preview-acceptance:
+    runs-on: ubuntu-latest
+    # Deploy previews only exist for pull requests.
+    if: github.event_name == 'pull_request'
+
+    permissions:
+      contents: read
+      statuses: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Wait for the Netlify deploy preview
+        id: preview
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          # The PR head SHA; github.sha is the merge commit, which Netlify
+          # does not post a status against.
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          CONTEXT: netlify/projectinsomnia/deploy-preview
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 40); do
+            payload=$(gh api "repos/${REPO}/commits/${HEAD_SHA}/status" \
+              --jq ".statuses[] | select(.context == \"${CONTEXT}\") | \"\(.state) \(.target_url)\"" \
+              2>/dev/null | head -1 || true)
+            state="${payload%% *}"
+            url="${payload#* }"
+
+            case "${state}" in
+              success)
+                echo "Deploy preview ready: ${url}"
+                echo "url=${url}" >> "${GITHUB_OUTPUT}"
+                exit 0
+                ;;
+              failure | error)
+                echo "::error::Netlify deploy preview reported '${state}'. See ${url}"
+                exit 1
+                ;;
+              *)
+                echo "attempt ${attempt}/40: state='${state:-none}', waiting..."
+                ;;
+            esac
+            sleep 15
+          done
+          echo "::error::Timed out after ~10m waiting for ${CONTEXT}."
+          exit 1
+
+      - name: Run acceptance checks against the preview
+        run: scripts/verify-deploy-preview.sh "${PREVIEW_URL}"
+        env:
+          PREVIEW_URL: ${{ steps.preview.outputs.url }}
