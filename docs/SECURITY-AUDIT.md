@@ -4,7 +4,7 @@ Tracking the `npm audit` state and the reasoning behind what is fixed versus
 accepted. Issue #123 asked for the residual risk to be a documented conclusion
 rather than an assumption, so this file records that.
 
-Last reviewed: 2026-08-20
+Last reviewed: 2026-08-21
 
 ## Current state
 
@@ -108,6 +108,54 @@ themselves.
 **Conclusion: accepted.** Revisit when `image-size` or `extract-zip` publish a
 patched release, or when `@netlify/dev` moves off them. Do not resolve by
 downgrading `@astrojs/netlify`.
+
+### Re-triaged 2026-08-21
+
+Re-checked whether upstream had moved. `image-size` (last published 2025-04)
+and `extract-zip` (2023-03) still have no patched release, and GitHub's
+Dependabot alerts agree — all three report `fixed_in=NONE`.
+
+Two things did change, and one path to clearing `image-size` now exists:
+
+- `@netlify/dev-utils@6.0.1` **dropped the `image-size` dependency entirely**.
+- `@netlify/dev@5.0.1` and `@netlify/functions-dev@2.0.1` are available.
+
+Forcing that newer chain via `overrides` was tested and takes `npm audit` from
+10 findings to 5, clearing `image-size` completely. The build passes and
+output verification succeeds.
+
+**It was deliberately not shipped.** `@netlify/vite-plugin@2.12.9` declares
+`@netlify/dev@^4.18.7`; the override forces v5, a major it has never been
+tested against. That is the same shape as the failure behind #120 — a
+dependency moving underneath the site and breaking something the build does
+not flag — with less warning and no upstream compatibility guarantee. The
+override would lower the audit count without lowering actual exposure, since
+every one of these is build-time-only tooling.
+
+`extract-zip` is irreducible from here regardless: even
+`@netlify/functions-dev@2.0.1` still depends on it.
+
+Filed upstream instead: **netlify/framework-adapters#47**, asking that
+`vite-plugin` widen its range so consumers can reach the fixed chain through a
+normal dependency update rather than an override that fights declared ranges.
+That issue resolving is the real fix; everything else is a workaround.
+
+### A note on the numbers
+
+Three different counts describe the same two root packages, which makes this
+look worse than it is:
+
+| Source | Count | What it counts |
+| --- | --- | --- |
+| GitHub Dependabot alerts | 3 | the actual distinct advisories |
+| `npm audit` | 10 | every chain package that pulls them in |
+| GitHub push warning | higher | the full graph, not the resolved tree |
+
+The 3 is the honest number: two `image-size` advisories and one `extract-zip`.
+
+GitHub labels them `scope=runtime`, which is npm's dependency-type label — it
+means "not declared under devDependencies", **not** that the code executes in
+production. The exposure assessment above still holds.
 
 ## Re-checking
 
