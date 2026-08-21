@@ -24,6 +24,8 @@ cd -- "${REPO_ROOT}"
 
 BASELINE_DOC="docs/SECURITY-AUDIT.md"
 FAILURES=0
+LOOKUPS_ATTEMPTED=0
+LOOKUPS_FAILED=0
 
 echo "🔍 Checking npm audit against the accepted baseline"
 echo "   baseline source: ${BASELINE_DOC}"
@@ -133,13 +135,17 @@ for root in ${ACCEPTED_ROOTS}; do
     " "${root}" || true)
 
   patched=""
+  root_lookup_failed=0
   if [[ "${SKIP_ADVISORY_API:-}" != "1" ]] && command -v gh >/dev/null 2>&1; then
     # Unpatched advisories report first_patched_version: null. Any non-null
     # value means a fixed release exists for an advisory we actually carry.
     for ghsa in ${ghsa_ids}; do
       # gh api has no --arg flag, so pipe the raw response to jq, which does.
       # That keeps the package name out of the filter string entirely.
+      LOOKUPS_ATTEMPTED=$((LOOKUPS_ATTEMPTED + 1))
       if ! advisory_json=$(gh api "https://api.github.com/advisories/${ghsa}" 2>/dev/null); then
+        LOOKUPS_FAILED=$((LOOKUPS_FAILED + 1))
+        root_lookup_failed=1
         echo "⚠️  ${root}: advisory lookup failed for ${ghsa} (network or auth?);"
         echo "     falling back to npm's affected-range heuristic"
         continue
@@ -174,7 +180,11 @@ for root in ${ACCEPTED_ROOTS}; do
     " "${root}" || true)
 
   if [[ "${range}" == "*" ]]; then
-    echo "✅ ${root}: still no patched release upstream (as accepted)"
+    if [[ "${root_lookup_failed}" == "1" ]]; then
+      echo "❓ ${root}: no patched release per npm's heuristic (advisory API unavailable)"
+    else
+      echo "✅ ${root}: still no patched release upstream (as accepted)"
+    fi
   else
     echo "🎉 ${root}: npm now reports a bounded range (${range}) — a fix may exist;"
     echo "     revisit ${BASELINE_DOC} and netlify/framework-adapters#47"
@@ -185,6 +195,25 @@ echo
 if [[ "${FAILURES}" -gt 0 ]]; then
   echo "Audit baseline check FAILED (${FAILURES} new advisory/advisories)."
   exit 1
+fi
+
+# A wholly-failing lookup path is not a security finding, but it silently
+# disables the "upstream shipped a fix" signal this check exists to provide.
+# If every attempt errored, say so loudly rather than printing a clean pass
+# that is indistinguishable from healthy operation.
+if [[ "${LOOKUPS_ATTEMPTED}" -gt 0 && "${LOOKUPS_FAILED}" -eq "${LOOKUPS_ATTEMPTED}" ]]; then
+  echo "❌ every advisory lookup failed (${LOOKUPS_FAILED}/${LOOKUPS_ATTEMPTED})."
+  echo "     No advisory outside the accepted set was found, but the"
+  echo "     patched-release check did not run: a fix could have shipped"
+  echo "     without this reporting it. Check GH_TOKEN, rate limits, and"
+  echo "     network access, or set SKIP_ADVISORY_API=1 to accept the"
+  echo "     npm heuristic deliberately."
+  exit 1
+fi
+
+if [[ "${LOOKUPS_FAILED}" -gt 0 ]]; then
+  echo "⚠️  ${LOOKUPS_FAILED}/${LOOKUPS_ATTEMPTED} advisory lookups failed;"
+  echo "     those roots fell back to npm's heuristic."
 fi
 
 echo "Audit baseline check passed — no advisories outside the accepted set."
