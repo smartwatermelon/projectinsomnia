@@ -37,14 +37,22 @@ if [[ -z "${AUDIT_JSON}" ]]; then
 fi
 
 # Advisory names present now.
+# `|| true` so a parse failure surfaces through the explicit check below with
+# a readable message, rather than aborting under `set -e` with a bare exit code.
 CURRENT=$(printf '%s' "${AUDIT_JSON}" \
   | node -e "
     let s='';
     process.stdin.on('data', d => s += d).on('end', () => {
-      const j = JSON.parse(s);
+      let j;
+      try { j = JSON.parse(s); } catch { process.exit(3); }
       console.log(Object.keys(j.vulnerabilities || {}).join('\n'));
     });
-  ")
+  " || true)
+
+if [[ -z "${CURRENT}" ]] && ! printf '%s' "${AUDIT_JSON}" | grep -q '"vulnerabilities"'; then
+  echo "❌ could not parse npm audit output"
+  exit 1
+fi
 
 # Anything not in the accepted set is new and must be triaged.
 for pkg in ${CURRENT}; do
@@ -58,11 +66,17 @@ done
 # Report when an accepted root becomes fixable -- that is the good news case,
 # and the cue to revisit the acceptance and the upstream issue.
 for root in ${ACCEPTED_ROOTS}; do
+  # npm reports an affected range of '*' when every published version is
+  # affected, i.e. no patched release exists. That is an observed convention
+  # rather than a documented guarantee, so if npm ever changes it this check
+  # degrades to missing the good-news notification -- it never causes a false
+  # pass on a NEW advisory, which is the failure that matters.
   fixable=$(printf '%s' "${AUDIT_JSON}" \
     | node -e "
       let s='';
       process.stdin.on('data', d => s += d).on('end', () => {
-        const j = JSON.parse(s);
+        let j;
+        try { j = JSON.parse(s); } catch { process.exit(3); }
         const v = (j.vulnerabilities || {})['${root}'];
         if (!v) { console.log('gone'); return; }
         console.log(v.range === '*' ? 'unfixed' : 'range:' + v.range);
