@@ -43,6 +43,12 @@ jobs:
         # docs/SECURITY-AUDIT.md, so the documented acceptance cannot quietly
         # widen to cover something new.
         run: scripts/check-audit-baseline.sh
+        env:
+          # For the GitHub Advisory API lookup that reports when an accepted
+          # advisory gains a patched release. The endpoint is public, but `gh`
+          # needs a token to make the call at all; without it the script falls
+          # back to npm's affected-range heuristic.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload build log on failure
         if: failure()
