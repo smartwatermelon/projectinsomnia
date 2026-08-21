@@ -38,6 +38,12 @@ jobs:
         # collections as a warning. See issue #121.
         run: scripts/verify-build-output.sh build.log
 
+      - name: Check npm audit against the accepted baseline
+        # Fails only on advisories outside the set accepted in
+        # docs/SECURITY-AUDIT.md, so the documented acceptance cannot quietly
+        # widen to cover something new.
+        run: scripts/check-audit-baseline.sh
+
       - name: Upload build log on failure
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
