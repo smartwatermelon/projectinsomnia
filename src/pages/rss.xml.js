@@ -1,5 +1,6 @@
 import rss from "@astrojs/rss";
 import { getCollection } from "astro:content";
+import { slugFromId } from "../lib/slugFromId";
 
 export async function GET(context) {
   const now = new Date();
@@ -16,9 +17,7 @@ export async function GET(context) {
       "Andrew Rich — writing about software, Spokane, and whatever else.",
     site: context.site,
     items: posts.map((post) => {
-      const slug = post.id
-        .replace(/^\d{4}-\d{2}-\d{2}-/, "")
-        .replace(/\.mdx?$/, "");
+      const slug = slugFromId(post.id);
       return {
         title: post.data.title,
         pubDate: post.data.date,
