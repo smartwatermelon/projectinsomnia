@@ -110,10 +110,14 @@ else
   fi
 
   # The feed sections are server-rendered; their absence means the page
-  # returned a shell rather than a real render.
+  # returned a shell rather than a real render. Match the heading element
+  # specifically -- a bare substring match would also hit the contribution
+  # graph's alt text and the "View full GitHub profile" link, so it would
+  # pass even if the heading itself disappeared.
   missing_sections=""
   for section in GitHub Strava Instagram; do
-    if ! printf '%s' "${NOW_BODY}" | grep -q "${section}"; then
+    if ! printf '%s' "${NOW_BODY}" \
+      | grep -qE "<h2[^>]*class=\"feed-heading\"[^>]*>${section}</h2>"; then
       missing_sections="${missing_sections} ${section}"
     fi
   done
@@ -134,10 +138,12 @@ fi
 #
 # What IS deploy-specific is Astro's trailing-slash behaviour, which comes
 # from the adapter and breaks visibly if routing regresses.
-REDIRECT_CODE=$(curl -sS --max-time 20 --retry 2 --retry-delay 2 \
-  -o /dev/null -w "%{http_code}" "${PREVIEW_URL}/now" || echo "000")
-REDIRECT_TARGET=$(curl -sS --max-time 20 --retry 2 --retry-delay 2 \
-  -o /dev/null -w "%{redirect_url}" "${PREVIEW_URL}/now" || echo "")
+# One request, both values: two separate curls could observe different
+# results if the deploy flipped between them.
+REDIRECT_INFO=$(curl -sS --max-time 20 --retry 2 --retry-delay 2 \
+  -o /dev/null -w "%{http_code} %{redirect_url}" "${PREVIEW_URL}/now" || echo "000 ")
+REDIRECT_CODE="${REDIRECT_INFO%% *}"
+REDIRECT_TARGET="${REDIRECT_INFO#* }"
 
 if [[ "${REDIRECT_CODE}" != "301" ]]; then
   fail "/now returned HTTP ${REDIRECT_CODE}, expected a 301 to /now/"
