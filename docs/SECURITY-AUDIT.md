@@ -157,12 +157,62 @@ GitHub labels them `scope=runtime`, which is npm's dependency-type label — it
 means "not declared under devDependencies", **not** that the code executes in
 production. The exposure assessment above still holds.
 
+## Accepted baseline (machine-readable)
+
+`scripts/check-audit-baseline.sh` parses the block below, so this document is
+the single source of truth for what CI enforces. Editing the list here changes
+the check; there is no second copy in the script to keep in sync.
+
+Lines are `root <name>` or `chain <name>`. A **root** is a package with an
+actual advisory that has no patched release upstream. A **chain** entry is
+reported by `npm audit` only because it depends on a root — not a distinct
+problem. Anything appearing in `npm audit` that is not listed here fails CI.
+
+<!-- BEGIN ACCEPTED-BASELINE -->
+```text
+root  image-size
+root  extract-zip
+chain @astrojs/netlify
+chain @netlify/blobs
+chain @netlify/dev
+chain @netlify/dev-utils
+chain @netlify/edge-functions-dev
+chain @netlify/functions-dev
+chain @netlify/images
+chain @netlify/redirects
+chain @netlify/vite-plugin
+```
+<!-- END ACCEPTED-BASELINE -->
+
+To retire an entry: confirm it no longer appears in `npm audit`, delete its
+line, and record why in the re-triage section above.
+
 ## Re-checking
 
 ```bash
-npm audit
+scripts/check-audit-baseline.sh
 ```
 
-If the count rises above 10, or any advisory appears that is *not* in the
-`image-size` / `extract-zip` chain above, triage it rather than assuming it
-falls under this acceptance.
+Runs in CI on every PR. It reads the accepted list from the block above, so
+this document is what CI enforces.
+
+- **Fails** when an advisory appears that is not listed above. Triage it;
+  do not assume this acceptance covers it.
+- **Reports without failing** when an accepted root gains a patched release,
+  which is the cue to retire its line here.
+
+The patched-release check queries the GitHub Advisory API for the specific
+GHSA IDs the current `npm audit` cites, and reads `first_patched_version`.
+Two deliberate choices there:
+
+- npm's own `fixAvailable` is **not** used. For these advisories npm reports a
+  fix of `@astrojs/netlify@6.4.1` — the major downgrade described above, which
+  would re-break the site. Keying on it would recommend the trap.
+- Querying by package name alone returns every advisory ever filed against it,
+  including ones already fixed in the installed version. That produced a false
+  "a fix exists" report for `image-size`, whose GHSA-m5qc-5hw7-8vg7 was patched
+  in 2.0.2 — the version already installed. Scoping to the cited GHSA IDs fixes
+  it.
+
+`SKIP_ADVISORY_API=1` skips the lookup for offline runs, falling back to npm's
+affected-range heuristic.
