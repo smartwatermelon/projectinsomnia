@@ -216,3 +216,11 @@ Two deliberate choices there:
 
 `SKIP_ADVISORY_API=1` skips the lookup for offline runs, falling back to npm's
 affected-range heuristic.
+
+A lookup failure is reported rather than hidden. Individual failures warn and
+fall back, and the affected root prints `❓` instead of `✅` so an unverified
+result is never mistaken for a confirmed one. If **every** lookup in a run
+fails, the check exits non-zero: a broken token or rate limit would otherwise
+disable the patched-release signal indefinitely while still printing a clean
+pass. That is a reporting failure, not a security finding — it cannot mask a
+new advisory, which is caught by the separate check above.
