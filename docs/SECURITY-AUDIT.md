@@ -43,6 +43,23 @@ exits 0. See #121 for why that failure is silent.
 Upgrading `@astrojs/netlify` to the newest 8.x (8.2.3) was tested and does
 **not** clear the remaining advisories.
 
+## Override side effect: picomatch vs anymatch
+
+The `picomatch` override to `^4.0.5` is applied tree-wide, so `anymatch@3.1.3`
+receives it despite declaring `picomatch: ^2.0.4`. This is a deliberate,
+accepted trade-off, not an oversight.
+
+It is safe because `anymatch` uses only the top-level callable form,
+`picomatch(matcher, options)`, whose signature is unchanged between v2 and v4.
+Build and deploy both verified.
+
+The residual risk is that this holds by convention rather than by contract —
+nothing enforces it, and the override silently wins. Accepted because
+`anymatch@3.1.3` is stable, the advisory is real, and the build CI would catch
+a regression. Scoping the override to specific paths would restore the
+declared range at the cost of a more complex `overrides` block; revisit only
+if `anymatch` or `picomatch` move. See issue #126.
+
 ## Accepted residual risk (10 advisories)
 
 All 10 trace to two transitive packages with **no fixed release published
