@@ -12,12 +12,12 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/mdx": "^7.0.5",
-    "@astrojs/netlify": "^8.1.2",
+    "@astrojs/mdx": "^7.0.8",
+    "@astrojs/netlify": "^8.2.4",
     "@astrojs/rss": "^4.0.19",
-    "@astrojs/sitemap": "^3.7.0",
+    "@astrojs/sitemap": "^3.7.3",
     "@netlify/blobs": "^11.0.1",
-    "astro": "^7.1.6",
+    "astro": "^7.2.8",
     "astro-expressive-code": "^0.44.1",
     "rss-parser": "^3.13.0"
   },
