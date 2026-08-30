@@ -1,12 +1,43 @@
-# Dependabot: auto-PR bumps for GitHub Actions pins in .github/workflows/.
-# Primary target: the smartwatermelon/github-workflows reusable workflow
-# (see https://github.com/smartwatermelon/github-workflows/releases).
-# Secondary: any other actions/* or third-party actions used here.
+# Dependabot: auto-PR version bumps. Two ecosystems, see each block below.
 version: 2
 updates:
+  # GitHub Actions pins in .github/workflows/.
+  # Primary target: the smartwatermelon/github-workflows reusable workflow
+  # (see https://github.com/smartwatermelon/github-workflows/releases).
+  # Secondary: any other actions/* or third-party actions used here.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
     commit-message:
       prefix: "chore"
+
+  # npm: routine version bumps for the package.json tree.
+  #
+  # Patch and minor bumps are grouped so a routine week is one PR rather than
+  # one per package. Majors are deliberately left ungrouped: a grouped PR never
+  # qualifies for auto-merge (the shared dependabot-auto-merge workflow forces
+  # any multi-dependency PR onto the trusted-namespace path), so bundling a
+  # major would only bury it in a diff nobody auto-merges anyway.
+  #
+  # @astrojs/netlify is ignored for major bumps on purpose. npm's proposed
+  # "fix" for the accepted advisories in docs/SECURITY-AUDIT.md is a DOWNGRADE
+  # to 6.4.1, which would reintroduce the Astro 5 content-collection API and
+  # re-break the site the way #120 fixed. Forward majors need the deliberate
+  # upgrade project, not an unattended PR. See #123.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore"
+    groups:
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      - dependency-name: "@astrojs/netlify"
+        update-types: ["version-update:semver-major"]

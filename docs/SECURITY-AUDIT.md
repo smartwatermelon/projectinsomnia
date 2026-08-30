@@ -93,12 +93,21 @@ because they pull in those packages.
 Both are **build- and dev-time only**, in the `@netlify/dev` toolchain. Neither
 is reachable from deployed code:
 
-- This site has **no user uploads**. Nothing untrusted is ever handed to an
-  image parser. `image-size` processes only images committed to this repo.
+- Nothing untrusted is ever handed to an image parser. `image-size` processes
+  only images committed to this repo. Note this is **not** because the site has
+  no user input: `netlify/functions/instagram-webhook.mts:88` fetches an
+  attacker-supplied `post.imageUrl` and stores the bytes. That path is
+  bearer-token gated (`:44`) and never parses the image, so it does not reach a
+  parser — but "no user uploads" overstates the case and should not be relied on
+  as the reason.
 - `extract-zip` is used by the local dev/functions tooling for archive
   extraction, not by anything running in production.
 - The deployed surface is static HTML plus a small SSR function and the
-  Instagram/GitHub functions, none of which parse images or archives.
+  Instagram/GitHub functions, none of which parse images or archives. Note the
+  site is **not** fully static: `src/pages/blog/index.astro:7` sets
+  `export const prerender = false`, and the built manifest carries six
+  `"prerender":false` routes deployed at `path: /*`. SSR does execute at request
+  time; it just does not parse images or archives.
 
 A DoS advisory against a build-time parser operating exclusively on
 repo-controlled input is not a meaningful risk to this site. The realistic
@@ -178,11 +187,61 @@ chain @netlify/dev
 chain @netlify/dev-utils
 chain @netlify/edge-functions-dev
 chain @netlify/functions-dev
-chain @netlify/images
 chain @netlify/redirects
 chain @netlify/vite-plugin
 ```
 <!-- END ACCEPTED-BASELINE -->
+
+### Re-triaged 2026-08-29
+
+Count is now **10 high**, down from the 15 this document and #123 were opened
+against. `sharp`, `picomatch`, `nanoid`, `ipx` and top-level `@netlify/blobs`
+were cleared by #127 and the blobs 10 -> 11 bump. Only three distinct CVEs
+remain — two against `image-size`, one against `extract-zip`; the other seven
+entries are chain packages flagged for depending on them.
+
+All three still have `first_patched_version: null` (verified against the GitHub
+Advisory API), and `npm view` confirms 2.0.2 and 2.0.1 are the newest published
+versions. There is nothing to upgrade to. npm still proposes the
+`@astrojs/netlify@6.4.1` downgrade for 9 of the 10 — still the trap.
+
+Retired `chain @netlify/images` from the baseline: it no longer appears in
+`npm audit` (the `sharp` override cleared it). Removing it is safe because the
+check only fails on *unlisted* packages, so a stale extra line could never mask
+a new finding — it was noise, not coverage.
+
+Also corrected two claims in the accepted-risk rationale above that were
+factually wrong, though the conclusion they support still holds: the site does
+have a user-influenced input path, and it does run SSR at request time.
+
+`@astrojs/netlify` 8.1.2 -> 8.2.4 is available and compatible (peer
+`astro: ^7.0.0` against the installed 7.1.6) but clears **zero** advisories: it
+declares the same `@netlify/vite-plugin: ^2.12.3`, which already resolves to
+2.12.9. Hygiene only, not a fix.
+
+#### Astro vendors its own `image-size`, invisible to this baseline
+
+`node_modules/astro/dist/assets/utils/vendor/image-size/` is a private copy that
+**ships in the deployed SSR bundle**. `npm audit` cannot see it, the `overrides`
+block does not cover it, and `check-audit-baseline.sh` — which reads only
+`npm audit` — will never report it. Its ICNS parser is logically identical to
+vulnerable upstream 2.0.2: same missing zero-length guard, so a crafted header
+declaring a zero-length entry pins `imageOffset` and loops.
+
+It is **not exploitable here**, and it fails closed twice:
+
+- `astro.config.mjs` declares no `image:` block, so `domains` and
+  `remotePatterns` are both empty and `isRemoteAllowed` returns `false` for
+  every remote URL — 403 before any fetch.
+- The configured service is `@astrojs/netlify/image-service.js`, whose exported
+  `service` object has **no `transform` method**. The `/_image` endpoint's first
+  check is `if (!("transform" in imageService)) throw` — 500 before a parser
+  runs.
+
+Recorded because **both guards are configuration, not code**. Adding a single
+`image.domains` entry, or switching to a local/sharp image service, removes them
+and makes the vendored parser reachable. Re-check this section before changing
+either.
 
 To retire an entry: confirm it no longer appears in `npm audit`, delete its
 line, and record why in the re-triage section above.
