@@ -8,8 +8,10 @@ Last reviewed: 2026-09-02
 
 ## Current state
 
-`npm audit` reports **10 high advisories, 0 critical/moderate/low**, down from
-15 at the time #123 was filed.
+`npm audit` reports **0 advisories**, down from 10 and from the 15 at the
+time #123 was filed. The accepted baseline is now empty: `image-size` and
+`extract-zip` were both cleared on 2026-09-02 by a single
+`@netlify/vite-plugin` override. See "Re-triaged 2026-09-02" below.
 
 ## What was fixed
 
@@ -21,6 +23,7 @@ Last reviewed: 2026-09-02
 | `nanoid` | `overrides` → `^5.1.6` | zero-size infinite loop; cleared |
 | `fast-uri` | `overrides` → `^3.1.6` | 4 SSRF/host-confusion; cleared |
 | `ipx` | — | cleared transitively by the `sharp` override |
+| `@netlify/vite-plugin` | `overrides` → `^3.0.1` | cleared both roots + chain |
 
 `@netlify/blobs` 10 → 11 is a major bump. The three call sites
 (`netlify/functions/instagram-{feed,image,webhook}.mts`) use `getStore`,
@@ -96,11 +99,17 @@ a regression. Scoping the override to specific paths would restore the
 declared range at the cost of a more complex `overrides` block; revisit only
 if `anymatch` or `picomatch` move. See issue #126.
 
-## Accepted residual risk (10 advisories)
+## Accepted residual risk (10 advisories) — RESOLVED 2026-09-02
 
-All 10 trace to two transitive packages with **no fixed release published
-upstream** — both report an affected range of `*`, meaning every existing
-version is affected:
+> **Historical.** These 10 were cleared by the `@netlify/vite-plugin` override;
+> nothing in this section is still accepted. It is kept because the exposure
+> assessment records why the risk was tolerable while it stood, and because the
+> "Astro vendors its own `image-size`" subsection below is **still live** — that
+> copy is private to Astro and was never part of this baseline.
+
+All 10 traced to two transitive packages with no fixed release published
+upstream at the time — both reported an affected range of `*`, meaning every
+existing version was affected:
 
 - **`image-size`** — DoS via infinite loop in the ICNS parser
   ([GHSA-w3rx-r6r6-pgpr](https://github.com/advisories/GHSA-w3rx-r6r6-pgpr))
@@ -150,9 +159,71 @@ repo-controlled input is not a meaningful risk to this site. The realistic
 worst case is a local build hanging on a malformed image the author added
 themselves.
 
-**Conclusion: accepted.** Revisit when `image-size` or `extract-zip` publish a
-patched release, or when `@netlify/dev` moves off them. Do not resolve by
-downgrading `@astrojs/netlify`.
+**Conclusion at the time: accepted.** The revisit condition named here —
+"when `@netlify/dev` moves off them" — is exactly what happened on 2026-09-02,
+and it was resolved that way, not by downgrading `@astrojs/netlify`.
+
+### Re-triaged 2026-09-02 — cleared to zero
+
+`npm audit` now reports **0 vulnerabilities**. One line did it:
+
+```json
+"@netlify/vite-plugin": "^3.0.1"
+```
+
+That single override pulls the whole Netlify dev chain forward — `@netlify/dev`
+5.0.5, `dev-utils` 6.0.1, `functions-dev` 2.0.5, `edge-functions-dev` 2.0.1,
+`redirects` 4.0.2 — because 3.0.1 declares those ranges itself. `image-size`
+and `extract-zip` are no longer anywhere in the tree (`npm ls` returns empty
+for both), so all 10 findings and both accepted roots are gone.
+
+**This is the same override route rejected on 2026-08-21. Both reasons it was
+rejected have since expired**, which is why it ships now and did not then:
+
+**Objection 1 — "`extract-zip` is irreducible from here."** It cleared only
+`image-size`, because `functions-dev@2.0.1` still required `extract-zip`.
+
+*Expired.* `functions-dev@2.0.5` replaced `extract-zip` with `yauzl@^3.4.0`.
+Verified with `npm view`; nothing in the resolved tree depends on it.
+
+**Objection 2 — "an untested major, the #120 failure shape."** The override
+forced `@netlify/dev` v5 underneath a `vite-plugin@2.12.9` that declared
+`^4.18.7`.
+
+*Expired.* The override is now on `vite-plugin` itself, and **3.0.1 declares
+`@netlify/dev: ^5.0.2`**. Upstream did the integration; no declared range is
+being fought.
+
+The second is the important one. The August override contradicted a
+maintainer's declared range; this one satisfies it. That is the difference
+between forcing an untested combination and taking a tested one.
+
+The one range still exceeded is `@astrojs/netlify@8.2.5`, which declares
+`@netlify/vite-plugin: ^2.12.3` and so cannot reach 3.x on its own — that
+caret is precisely why an override is still needed rather than a plain
+`npm update`. The gap is a Node engines bump, not an API break:
+`vite-plugin` 2.12.9 → 3.0.1 changes `engines.node` from `^20.6.1 || >=22` to
+`>=22.12.0` and leaves `peerDependencies` (`vite: ^5 || ^6 || ^7 || ^8`)
+untouched. This repo already sets `engines.node: >=22.12.0`, and both CI
+(`.nvmrc`) and Netlify (`NODE_VERSION`) build on Node 24, so the new floor is
+already met everywhere the site builds.
+
+Verified on Node 24 with a clean `node_modules`:
+
+- `npm audit` → 0 vulnerabilities
+- `npm run build` → succeeds
+- `npx tsc --noEmit` → exit 0
+- Output checked against the #120/#121 silent-failure signature, which a green
+  build does not rule out: `dist/rss.xml` is 14,949 bytes with 30 `<item>`
+  entries (not the 274-byte empty feed), 33 blog directories emitted, homepage
+  post links present.
+- Top-level `@netlify/blobs` stays at 11.0.2, so the functions' own dependency
+  is untouched by the chain move.
+
+`netlify/framework-adapters#47` is still the real fix: with `vite-plugin`'s
+range widened in `@astrojs/netlify`, this override becomes unnecessary and
+should be dropped. Until then it is load-bearing — removing it silently
+restores all 10 advisories.
 
 ### Re-triaged 2026-08-21
 
@@ -213,18 +284,15 @@ actual advisory that has no patched release upstream. A **chain** entry is
 reported by `npm audit` only because it depends on a root — not a distinct
 problem. Anything appearing in `npm audit` that is not listed here fails CI.
 
+The list is currently **empty**: nothing is accepted, so any advisory at all
+fails CI. The lone `none` line is the deliberate-empty sentinel — the script
+distinguishes it from a missing or malformed block, which is still an error.
+Do not delete it; if an advisory ever has to be accepted again, replace it
+with the `root`/`chain` lines and record the reasoning above.
+
 <!-- BEGIN ACCEPTED-BASELINE -->
 ```text
-root  image-size
-root  extract-zip
-chain @astrojs/netlify
-chain @netlify/blobs
-chain @netlify/dev
-chain @netlify/dev-utils
-chain @netlify/edge-functions-dev
-chain @netlify/functions-dev
-chain @netlify/redirects
-chain @netlify/vite-plugin
+none
 ```
 <!-- END ACCEPTED-BASELINE -->
 

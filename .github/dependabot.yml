@@ -20,11 +20,16 @@ updates:
   # any multi-dependency PR onto the trusted-namespace path), so bundling a
   # major would only bury it in a diff nobody auto-merges anyway.
   #
-  # @astrojs/netlify is ignored for major bumps on purpose. npm's proposed
-  # "fix" for the accepted advisories in docs/SECURITY-AUDIT.md is a DOWNGRADE
-  # to 6.4.1, which would reintroduce the Astro 5 content-collection API and
-  # re-break the site the way #120 fixed. Forward majors need the deliberate
-  # upgrade project, not an unattended PR. See #123.
+  # @astrojs/netlify is ignored for major bumps on purpose. Whenever npm has an
+  # advisory to "fix" here, its proposed fix is a DOWNGRADE to 6.4.1, which
+  # would reintroduce the Astro 5 content-collection API and re-break the site
+  # the way #120 fixed. The audit is at zero as of 2026-09-02, but the trap
+  # returns with the next advisory, so this ignore stays. Forward majors need
+  # the deliberate upgrade project, not an unattended PR. See #123.
+  #
+  # Note: the `@netlify/vite-plugin: ^3.0.1` override in package.json is what
+  # holds the audit at zero (see docs/SECURITY-AUDIT.md). Dependabot does not
+  # manage `overrides`, so it will not bump or drop that entry on its own.
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
