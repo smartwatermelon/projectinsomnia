@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
 # Guard the accepted npm audit baseline.
 #
-# docs/SECURITY-AUDIT.md accepts a specific, enumerated set of advisories:
-# they are build-time-only, and no patched release exists upstream. That
-# acceptance is only safe if something notices when the situation changes.
+# docs/SECURITY-AUDIT.md enumerates the advisories this repo accepts: ones
+# that are build-time-only with no patched release upstream. That acceptance
+# is only safe if something notices when the situation changes.
+#
+# As of 2026-09-02 that list is EMPTY (a lone `none` sentinel) -- the audit is
+# at zero, so any advisory at all fails this check. The parsing below still
+# supports a populated list for when something has to be accepted again.
 #
 # This fails when a NEW advisory appears outside the accepted set, and reports
 # (without failing) when an accepted root becomes fixable -- the signal that
@@ -51,10 +55,25 @@ fi
 BASELINE_BLOCK=$(sed -n '/BEGIN ACCEPTED-BASELINE/,/END ACCEPTED-BASELINE/p' "${BASELINE_DOC}" \
   | grep -E '^(root|chain)[[:space:]]+' || true)
 
-if [[ -z "${BASELINE_BLOCK}" ]]; then
+# An empty accepted list is a legitimate -- indeed the desired -- state, but it
+# is indistinguishable from a block that failed to parse. A literal `none` line
+# is the sentinel for "deliberately empty", so a typo'd or truncated block
+# still fails loudly instead of silently accepting nothing and passing.
+BASELINE_NONE=$(sed -n '/BEGIN ACCEPTED-BASELINE/,/END ACCEPTED-BASELINE/p' "${BASELINE_DOC}" \
+  | grep -cE '^none[[:space:]]*$' || true)
+
+if [[ -z "${BASELINE_BLOCK}" && "${BASELINE_NONE}" == "0" ]]; then
   echo "❌ no ACCEPTED-BASELINE block found in ${BASELINE_DOC}"
   echo "     Expected lines of the form 'root <pkg>' / 'chain <pkg>' between"
-  echo "     the BEGIN/END ACCEPTED-BASELINE markers."
+  echo "     the BEGIN/END ACCEPTED-BASELINE markers, or a lone 'none' line"
+  echo "     to declare the accepted list deliberately empty."
+  exit 1
+fi
+
+if [[ -n "${BASELINE_BLOCK}" && "${BASELINE_NONE}" != "0" ]]; then
+  echo "❌ ${BASELINE_DOC} has both 'none' and root/chain entries"
+  echo "     The sentinel means the list is empty; it cannot coexist with"
+  echo "     accepted packages. Remove whichever is wrong."
   exit 1
 fi
 
@@ -62,7 +81,11 @@ ACCEPTED_ROOTS=$(awk '$1=="root" && NF>=2 {print $2}' <<<"${BASELINE_BLOCK}")
 ACCEPTED_ALL=$(awk 'NF>=2 {print $2}' <<<"${BASELINE_BLOCK}")
 
 ROOTS_ONELINE=$(tr '\n' ' ' <<<"${ACCEPTED_ROOTS}")
-echo "   accepted roots: ${ROOTS_ONELINE}"
+if [[ -z "${ROOTS_ONELINE// /}" ]]; then
+  echo "   accepted roots: (none — any advisory fails this check)"
+else
+  echo "   accepted roots: ${ROOTS_ONELINE}"
+fi
 echo
 
 # --- Read the current advisory set -----------------------------------------
