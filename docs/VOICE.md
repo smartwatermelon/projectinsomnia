@@ -43,7 +43,8 @@ structural habits that pull the rhythm toward the generic AI-essay
 register:
 
 1. Bold lead-ins on numbered lists (`**Thing.** Sentence about thing.`)
-2. "X. Then Y." headlines
+2. Two-sentence headlines whose second sentence continues the first
+   rather than turning on it
 3. Italicized parallelism for emphasis (*what happened* / *the full story*)
 4. Stock end-of-post section sequence: "Hard Problems → What I'd Do
    Differently → What's Next"
@@ -104,13 +105,10 @@ Greppable problems. These are mostly mechanical and easy to fix:
   the pattern, it is the absence of any other pattern: every list in a
   post built the same way. Vary it, and convert to prose or a
   sentence-led list where the label is not earning anything.
-- **"X. Then Y." headlines.** "I Solo-Built a Production Observability
-  Platform. Then I Got Laid Off by Email." This works for LinkedIn
-  engagement and against your voice. Other patterns work better for
-  you: a specific weird detail ("The Mac Mini Has a Thunderbolt Port.
-  The Simulator Doesn't Know That.") or a confession-framed-as-service
-  ("The Synergy Multi-Monitor Rabbit Hole I Fell Into So You Don't Have
-  To").
+- **Headlines with no turn.** The two-sentence claim-then-turn title is
+  the master's item 10 and this sheet's own house pattern, so it is not
+  on this list. What fails is the version where the second sentence only
+  continues the first instead of darkening it. See Headlines below.
 - **Italicized parallelism.** *"Pageout data tells you what happened.
   Notification data tells you the full story."* Cut the italics. Better,
   cut the parallelism — it's a triadic rhythm move and you don't need it.
@@ -205,8 +203,20 @@ Three patterns work for your voice:
 - **Keyword-stuffed how-to.** "Unlocking the Login Keychain Over SSH on
   a Headless Mac." Fine for SEO posts. Don't dress it up.
 
-The pattern to drop is **"X. Then Y."** It's the LinkedIn hook style and
-it homogenizes you toward every other Substack tech writer.
+All three are two-sentence titles: a declarative claim, then a hard turn
+that darkens or undercuts it. That is the master's item 10, and it is the
+formula rather than a tell. This sheet used to say the opposite, naming
+"I Solo-Built a Production Observability Platform. Then I Got Laid Off by
+Email." as a LinkedIn tic to drop, which contradicted the master citing
+that exact headline as the pattern. The master wins; the ban is gone.
+
+The turn is what does the work, so watch the connective rather than the
+structure. A literal **"X. Then Y."** built on a bare *Then* is the weak
+form of the move, because sequence is not a reversal: the second sentence
+has to darken, undercut, or contradict the first. "The Mac Mini Has a
+Thunderbolt Port. The Simulator Doesn't Know That." earns it on the
+mismatch between two true facts. Rewrite for a sharper turn, never to
+flatten the title back to one clause.
 
 ## Voice check (run before publishing)
 
