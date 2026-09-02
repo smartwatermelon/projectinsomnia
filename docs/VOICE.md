@@ -3,6 +3,33 @@
 A working reference for writing and editing posts. Drop into a system
 prompt, keep open while editing, or grep against a draft.
 
+## Scope: this is an overlay
+
+This sheet covers one surface: blog posts in this repo. It is not the
+master voice guide.
+
+The master lives outside this repo, at `~/.config/personify/VOICE.md`, and
+is loaded by the `personify` skill. It describes how the author writes
+everywhere: blog, email, work records, PR comments. It is personal, is
+git-ignored like `.env`, and is deliberately not published.
+
+**The master wins on any conflict.** This sheet holds only what is
+specific to publishing here: the essay/how-to split, headline patterns,
+the narrator, and the pre-publish checks. General anti-AI-tell rules are
+not repeated here, because `personify` already applies them and a second
+copy drifts out of sync with the first.
+
+Two rules this sheet used to state as flat bans, corrected to match the
+master, which treats both as deliberate moves rather than tells:
+
+- **Bold lead-ins** are allowed in technical posts for scannability. Watch
+  for them as an unbroken default across a whole post, not as a pattern.
+- **Triads** are a real device the author uses on purpose. Flag the
+  unearned, pattern-completed three, not every three.
+
+If something here contradicts the master, the master is right and this
+sheet needs an edit.
+
 ## Where the voice actually is
 
 The bones are fine. Lines like *"I am a person with too many computers.
@@ -71,10 +98,12 @@ Moves to keep doing or do more of:
 
 Greppable problems. These are mostly mechanical and easy to fix:
 
-- **Bold lead-ins on numbered lists.** `1. **Zero operational overhead.**
-  No database pod...` Replace with a regular paragraph or a sentence-led
-  list. The bold-lead-in pattern is the single most identifiable
-  AI-essay tic in your work.
+- **Bold lead-ins used as the default list format.** `1. **Zero
+  operational overhead.** No database pod...` The master allows these in
+  technical writing, where they genuinely aid scanning. The tell is not
+  the pattern, it is the absence of any other pattern: every list in a
+  post built the same way. Vary it, and convert to prose or a
+  sentence-led list where the label is not earning anything.
 - **"X. Then Y." headlines.** "I Solo-Built a Production Observability
   Platform. Then I Got Laid Off by Email." This works for LinkedIn
   engagement and against your voice. Other patterns work better for
@@ -85,17 +114,19 @@ Greppable problems. These are mostly mechanical and easy to fix:
 - **Italicized parallelism.** *"Pageout data tells you what happened.
   Notification data tells you the full story."* Cut the italics. Better,
   cut the parallelism — it's a triadic rhythm move and you don't need it.
-- **Triadic rhetorical constructions.** "the technical reality, the
-  political reality, the operational reality." Threes have a strong
-  rhythm and that rhythm is now the AI-essay rhythm. Twos and fours are
-  quietly more yours.
+- **Unearned triads.** "the technical reality, the political reality, the
+  operational reality." The master protects deliberate threes ("One
+  finish. Two DNFs. Three withdrawals.") as a real device. What to catch
+  is the pattern-completed one, where the third item exists because two
+  felt short. Test: cut the third. If nothing is lost, it was rhythm
+  filler.
 - **Stock section sequence.** "Hard Problems → What I'd Do Differently
   → What's Next" is fine once. Used as a default it becomes a template.
   Vary it. The Synergy post's structure is better — it's organized by
   the actual investigation.
 - **The flagged words.** *"shape"* and *"load-bearing."* Greppable.
   Should be zero per post unless literally describing something's shape
-  or load-bearing capacity. The Deason piece uses both heavily.
+  or load-bearing capacity. One earlier post leans on both heavily.
 - **Em-dash overuse.** Em-dashes are fine. Em-dashes carrying clause
   structure for 20% of your sentences is not. Target: under 5 per 1000
   words. Convert most to commas, periods, or parens.
@@ -110,62 +141,26 @@ Greppable problems. These are mostly mechanical and easy to fix:
   is not a flex" is a confessional move and works; "it's not X, it's Y"
   used as rhetorical structure is the AI register. Watch for the
   difference. The Wikipedia AI-writing page calls this out as a top tell.
-- **False ranges.** "From late-night incidents to leadership reviews."
-  The "from X to Y" construction implies a spectrum that usually isn't
-  there. If the two endpoints aren't actually the ends of a continuum,
-  the construction is fake.
-- **Compulsive summaries.** "Overall," "In conclusion," "To summarize"
-  — and the tendency to restate what was just said. Long posts can earn
-  a closing paragraph; that paragraph should not begin with a summarizing
-  transition word.
-- **Sourceless collective opinion.** "Many engineers feel," "modern SREs
-  argue," "the consensus is." Either name the people or drop the claim.
-  This is one of the most reliable AI tells because LLMs invent the
-  consensus to fill space.
-- **Puffery via abstraction.** "This represents a pivotal shift in how
-  organizations approach observability." Generic enough to apply to
-  anything, which is why an LLM produced it. If the sentence would also
-  work in a press release for a different product, cut it.
 - **Uniform paragraph length.** AI text tends toward visually identical
-  paragraphs — three to five sentences each, repeating. Vary on purpose.
+  paragraphs, three to five sentences each, repeating. Vary on purpose.
   Your shortest paragraph in a post should be one sentence. Your longest
-  can run.
+  can run. Kept here because it is a visual property of a published page,
+  which is a blog concern rather than a sentence-level one.
 
-## Banned vocabulary
+**Handled by `personify`, not repeated here.** False ranges ("from X to
+Y" where no spectrum exists), compulsive summaries ("Overall," "In
+conclusion"), sourceless collective opinion ("many engineers feel"),
+puffery via abstraction, the AI-vocabulary list (`delve`, `pivotal`,
+`robust`, `leverage`, and the rest), the tech-blog purple-verb list
+(`dance` for a protocol, `under the hood`, `deep dive`), and filler
+phrases (`it's worth noting`, `at the end of the day`). Running the skill
+covers all of these, and its taxonomy is maintained. A second copy here
+would drift out of sync and eventually contradict it, which is exactly
+what happened with the bold-lead-in and triad rules above.
 
-A greppable list. Most of these are flagged by the Wikipedia
-AI-writing-signs page as canonical LLM tells; the rest are tics specific
-to tech writing.
-
-**General AI-vocabulary blacklist** — these words have been so heavily
-used by LLMs that they now read as machine-written regardless of context:
-
-`delve`, `intricate`, `tapestry`, `pivotal`, `underscore` (verb),
-`landscape` (metaphor), `foster` (verb), `testament`, `enhance`,
-`crucial`, `seamless`, `robust`, `leverage` (verb), `comprehensive`,
-`navigate` (metaphor), `ecosystem` (metaphor)
-
-**Tech-blog-specific blacklist** — purple verbs and tired figures:
-
-`dance` (for any technical back-and-forth: handshakes, key exchanges,
-polling, request/response — the protocol does not dance), `choreography`
-/ `ballet` (same problem), `under the hood`, `deep dive` / `dive into`,
-`unpack` (verb, for explaining), `elegant` (as default praise — say what's
-specifically good about it instead)
-
-**Filler phrases**:
-
-`it's worth noting`, `it's important to remember`, `at the end of the
-day`, `that said` (as transition), `needless to say`
-
-These aren't blanket bans on the underlying concepts. "Foster" the noun
-is fine. A literal handshake protocol is fine. Cryptographic key
-exchanges are technical terms, not metaphors. The bans are on the
-metaphorical/promotional uses where the word is doing rhetorical work it
-shouldn't be doing.
-
-Add to this list as you spot more in your own drafts. The list is a
-tool, not gospel.
+The two flagged words specific to this blog, `shape` and `load-bearing`,
+stay on this sheet because they are personal tics rather than general
+tells.
 
 ## Two modes
 
@@ -215,21 +210,21 @@ it homogenizes you toward every other Substack tech writer.
 
 ## Voice check (run before publishing)
 
-A short checklist. Most of these are greps; a few are reads.
+Run `personify` on the draft first. It catches the general tells, using
+the master voice guide, so this list covers only what is left: blog
+structure, and the two personal flagged words.
 
+- [ ] **`personify` has been run on the draft.** Everything below assumes
+  it has. Do not hand-grep the vocabulary and phrasing tells it already
+  covers.
 - [ ] **Em-dash count under 5 per 1000 words.**
-  `grep -o '—' post.md | wc -l`
-- [ ] **Banned-vocab grep.** Run a single grep against the list above.
-  Aim for zero hits, then justify any exceptions one at a time.
+  `grep -o '—' post.md | wc -l` (blog register keeps the dash as voice;
+  the master sets the count to zero only in work records, which this is
+  not)
 - [ ] **Zero "load-bearing" and zero "shape"** (unless literal).
-- [ ] **Zero "dance"** for any non-literal use. The protocol doesn't
-  dance.
-- [ ] **Negative-parallelism scan.** Search for `It's not` / `It is not`
-  followed within 20 words by `it's` / `it is`. If the pattern is doing
-  structural work, rewrite.
-- [ ] **"From X to Y" scan.** If the spectrum isn't real, kill it.
-- [ ] **Numbered lists scanned**: any `\d\. \*\*[^*]+\.\*\*` patterns?
-  Convert to prose.
+- [ ] **Numbered lists scanned**: are all of them `\d\. \*\*[^*]+\.\*\*`?
+  One or two is fine and often better. Every list in the post built that
+  way is the tell.
 - [ ] **Headline read aloud.** Does it sound like a LinkedIn post? If
   so, reframe.
 - [ ] **Italics audit.** Italics for *emphasis-by-parallelism* — cut.
