@@ -4,7 +4,7 @@ Tracking the `npm audit` state and the reasoning behind what is fixed versus
 accepted. Issue #123 asked for the residual risk to be a documented conclusion
 rather than an assumption, so this file records that.
 
-Last reviewed: 2026-08-21
+Last reviewed: 2026-09-02
 
 ## Current state
 
@@ -19,12 +19,48 @@ Last reviewed: 2026-08-21
 | `sharp` | `overrides` → `^0.35.3` | advisory required `>=0.35.0`; cleared |
 | `picomatch` | `overrides` → `^4.0.5` | ReDoS + method injection; cleared |
 | `nanoid` | `overrides` → `^5.1.6` | zero-size infinite loop; cleared |
+| `fast-uri` | `overrides` → `^3.1.6` | 4 SSRF/host-confusion; cleared |
 | `ipx` | — | cleared transitively by the `sharp` override |
 
 `@netlify/blobs` 10 → 11 is a major bump. The three call sites
 (`netlify/functions/instagram-{feed,image,webhook}.mts`) use `getStore`,
 `.get()`, `.set()`, and `.setJSON()`; all are present in v11 with compatible
 signatures, and the functions type-check clean against the v11 declarations.
+
+## The `fast-uri` override
+
+`fast-uri` appeared on 2026-09-02 as a new advisory outside the accepted
+baseline, and `scripts/check-audit-baseline.sh` failed the build as designed.
+It is not part of the accepted set: unlike `image-size` and `extract-zip`, a
+patched release exists, so the correct response was to take it.
+
+Four advisories, all fixed in 3.1.6:
+
+| Advisory | Issue |
+| --- | --- |
+| [GHSA-f65p-4m7j-42xc](https://github.com/advisories/GHSA-f65p-4m7j-42xc) | SSRF via malformed IPv6 normalization |
+| [GHSA-fph4-wmhf-6fwf](https://github.com/advisories/GHSA-fph4-wmhf-6fwf) | SSRF via repeated hostname percent-decoding |
+| [GHSA-jqff-g426-hqxp](https://github.com/advisories/GHSA-jqff-g426-hqxp) | Host confusion via percent-encoded scheme normalization |
+| [GHSA-5jgf-p345-68v8](https://github.com/advisories/GHSA-5jgf-p345-68v8) | Host confusion via skipped IDN canonicalization |
+
+The path is build-time only, like the accepted roots:
+
+```text
+@astrojs/netlify → @netlify/vite-plugin → @netlify/dev
+  → @netlify/edge-functions-dev → @netlify/edge-bundler → ajv → fast-uri
+```
+
+An `overrides` entry rather than `npm update fast-uri`, for two reasons. The
+override records the constraint in `package.json`, where the other three
+already live, so a future `npm install` cannot quietly resolve back to 3.1.5.
+And `npm update` pulled unrelated subtrees (`@netlify/blobs`,
+`@netlify/dev-utils`) into the lockfile alongside the fix; the override moves
+exactly one package.
+
+No compatibility risk: `ajv@8.20.0` declares `fast-uri: ^3.0.1`, which 3.1.7
+satisfies, so the override supplies a version the consumer already accepts.
+This is unlike the `picomatch` case below, where the override deliberately
+exceeds the declared range.
 
 ## What was NOT done, and why
 
