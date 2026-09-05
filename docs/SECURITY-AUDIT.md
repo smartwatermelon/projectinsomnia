@@ -4,14 +4,15 @@ Tracking the `npm audit` state and the reasoning behind what is fixed versus
 accepted. Issue #123 asked for the residual risk to be a documented conclusion
 rather than an assumption, so this file records that.
 
-Last reviewed: 2026-09-02
+Last reviewed: 2026-09-05
 
 ## Current state
 
-`npm audit` reports **0 advisories**, down from 10 and from the 15 at the
-time #123 was filed. The accepted baseline is now empty: `image-size` and
-`extract-zip` were both cleared on 2026-09-02 by a single
-`@netlify/vite-plugin` override. See "Re-triaged 2026-09-02" below.
+`npm audit` reports **0 advisories**. The accepted baseline is empty.
+`toml` appeared as a new advisory on 2026-09-05 and was cleared the same
+day by an `overrides` bump. See "Re-triaged 2026-09-05" below. Before that,
+`image-size` and `extract-zip` were cleared on 2026-09-02 by the
+`@netlify/vite-plugin` override — see "Re-triaged 2026-09-02" below.
 
 ## What was fixed
 
@@ -29,6 +30,37 @@ time #123 was filed. The accepted baseline is now empty: `image-size` and
 (`netlify/functions/instagram-{feed,image,webhook}.mts`) use `getStore`,
 `.get()`, `.set()`, and `.setJSON()`; all are present in v11 with compatible
 signatures, and the functions type-check clean against the v11 declarations.
+
+## The `toml` override
+
+`toml` appeared on 2026-09-05 as a new advisory outside the accepted
+baseline (empty), and `scripts/check-audit-baseline.sh` failed the build as
+designed. Two advisories, both fixed by 4.3.0, the newest published release:
+
+| Advisory | Issue | Fixed in |
+| --- | --- | --- |
+| [GHSA-82x6-q7mm-w9cf](https://github.com/advisories/GHSA-82x6-q7mm-w9cf) | Uncontrolled recursion | `>=4.2.0` |
+| [GHSA-v5mp-jgw5-2x6j](https://github.com/advisories/GHSA-v5mp-jgw5-2x6j) | Prototype pollution via `__proto__` key-path desync | `>=4.1.2` |
+
+The path is build-time only, like the accepted roots and the `fast-uri`
+case below:
+
+```text
+@astrojs/netlify → @netlify/vite-plugin → @netlify/dev
+  → @netlify/functions-dev → @netlify/zip-it-and-ship-it → toml
+```
+
+`zip-it-and-ship-it` has exactly one call site
+(`dist/runtimes/rust/builder.js`), `toml.parse(manifest)`, reading a Rust
+function's `Cargo.toml` while bundling. That top-level `.parse()` call is
+`toml`'s stable entry point and is unchanged from 3.x to 4.x; nothing else
+in the resolved tree imports the package.
+
+An `overrides` entry (`"toml": "^4.1.2"`) rather than declaring `^4.3.0`
+directly, matching the `fast-uri` convention below: pin the floor that
+clears the advisories and let npm resolve forward. It resolved to 4.3.0 on
+install, which clears both. Verified: `npm audit` → 0 vulnerabilities,
+`npm run build` → succeeds, `npx tsc --noEmit` → exit 0.
 
 ## The `fast-uri` override
 
