@@ -84,3 +84,5 @@ The script coexists with the original native filter without conflict, since alre
 What changed is the maintenance loop. Adding a newsletter used to mean opening a laptop, finding the filter settings pane, and editing a 637-character string with 22 clauses in it. Now it means tagging one message on my phone and waiting fifteen minutes for it to swallow the sender's entire history.
 
 The character limit is still there. I just don't have a filter long enough to hit it.
+
+Code: [smartwatermelon/gmail-newsletter-filter](https://github.com/smartwatermelon/gmail-newsletter-filter).
