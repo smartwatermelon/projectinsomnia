@@ -4,16 +4,16 @@ Tracking the `npm audit` state and the reasoning behind what is fixed versus
 accepted. Issue #123 asked for the residual risk to be a documented conclusion
 rather than an assumption, so this file records that.
 
-Last reviewed: 2026-09-10
+Last reviewed: 2026-10-05
 
 ## Current state
 
-`npm audit` reports **0 advisories**. The accepted baseline is empty.
-`sharp` appeared as a new advisory on 2026-09-09 and was cleared on
-2026-09-10 by an `overrides` bump. See "Re-triaged 2026-09-10" below.
-Before that, `toml` was cleared on 2026-09-05 by the same mechanism, and
-`image-size` and `extract-zip` were cleared on 2026-09-02 by the
-`@netlify/vite-plugin` override — see the dated sections below.
+`npm audit` reports **12 advisories** (all high): two roots with no patched
+release, `braces` and `node-forge`, plus ten chain entries flagged only for
+depending on them. Both roots are accepted until **2026-11-05**; see
+"Re-triaged 2026-10-05" below. Earlier clears: `sharp` on 2026-09-10 and
+`toml` on 2026-09-05 (`overrides`), `image-size` and `extract-zip` on
+2026-09-02 (the `@netlify/vite-plugin` override).
 
 ## What was fixed
 
@@ -64,6 +64,51 @@ exists one patch version up. Verified after this change that
 
 Verified: `scripts/check-audit-baseline.sh` → passed, `npm audit` → 0
 vulnerabilities, `npm run build` → succeeds.
+
+## Re-triaged 2026-10-05 — `braces`, `node-forge`, `http-cache-semantics`
+
+`build` was red on `main` from 2026-10-02: advisories published 2026-09-03
+onward landed outside the empty baseline. A fresh `npm ci` on `main` on
+2026-10-05 reports 14 (four roots, ten chain entries); this change brings it
+to 12.
+
+| Advisory | Package | Severity | Resolution |
+| --- | --- | --- | --- |
+| [GHSA-ch52-4w7c-c8xp](https://github.com/advisories/GHSA-ch52-4w7c-c8xp) | `http-cache-semantics` | high | fixed: lockfile 4.2.0 → 4.3.0 |
+| [GHSA-xjh9-v7x6-24jw](https://github.com/advisories/GHSA-xjh9-v7x6-24jw), [GHSA-x8mw-p69m-v3mx](https://github.com/advisories/GHSA-x8mw-p69m-v3mx) | `@fastify/busboy` | high | fixed: lockfile 3.2.0 → 3.2.2 |
+| [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) | `braces` | high | accepted, review by 2026-11-05 |
+| [GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv) | `node-forge` | high | accepted, review by 2026-11-05 |
+
+The two fixes were targeted in-range updates
+(`npm update @fastify/busboy http-cache-semantics --package-lock-only`).
+`npm audit fix` was not used as-is: it also refreshed about thirty unrelated
+Netlify packages.
+
+**Why `braces` and `node-forge` are accepted.** Both have no patched release:
+the GitHub Advisory API reports `first_patched_version: null`, and the newest
+published versions (`braces@3.0.3`, `node-forge@1.4.0`) are the affected ones.
+The only fix npm offers is the `@astrojs/netlify@6.4.1` downgrade rejected
+below.
+
+Paths, both build-time tooling:
+
+```text
+@astrojs/netlify → @netlify/vite-plugin → @netlify/dev
+  → @netlify/functions-dev → @netlify/zip-it-and-ship-it
+  → fast-glob → micromatch → braces
+@astrojs/netlify → @netlify/vite-plugin → @netlify/dev
+  → @netlify/images → ipx → listhen → node-forge
+```
+
+Not reachable from deployed code. Verified 2026-10-05 after `npm run build`:
+the SSR function's `node_modules` holds only `@netlify/blobs`, `@netlify/otel`
+and a few small libraries; no word-boundary match for `braces`, `node-forge`,
+`micromatch`, `fast-glob` or `listhen` in `dist/` or `.netlify/` code, and no
+import of `ipx` or `@netlify/images`. `braces` expands globs in the bundler
+(repo-controlled patterns); `node-forge` serves the `ipx` dev server's TLS.
+
+Revisit by 2026-11-05, or sooner when `braces` or `node-forge` publishes a
+fix (the check reports it) or netlify/framework-adapters#47 lands.
 
 ## The `toml` override
 
@@ -350,15 +395,25 @@ actual advisory that has no patched release upstream. A **chain** entry is
 reported by `npm audit` only because it depends on a root — not a distinct
 problem. Anything appearing in `npm audit` that is not listed here fails CI.
 
-The list is currently **empty**: nothing is accepted, so any advisory at all
-fails CI. The lone `none` line is the deliberate-empty sentinel — the script
-distinguishes it from a missing or malformed block, which is still an error.
-Do not delete it; if an advisory ever has to be accepted again, replace it
-with the `root`/`chain` lines and record the reasoning above.
+The list holds two roots and ten chain entries, accepted until 2026-11-05
+(see "Re-triaged 2026-10-05"). When it empties again, replace the lines with
+a lone `none` sentinel: the script distinguishes it from a missing or
+malformed block, which is still an error.
 
 <!-- BEGIN ACCEPTED-BASELINE -->
 ```text
-none
+root braces
+root node-forge
+chain fast-glob
+chain micromatch
+chain ipx
+chain listhen
+chain @netlify/images
+chain @netlify/zip-it-and-ship-it
+chain @netlify/functions-dev
+chain @netlify/dev
+chain @netlify/vite-plugin
+chain @astrojs/netlify
 ```
 <!-- END ACCEPTED-BASELINE -->
 
