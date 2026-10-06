@@ -149,11 +149,13 @@ libheif advisory above.
 **Why `postcss-nested` needs an override.** `@expressive-code/core@0.44.2`
 (the latest) depends on `postcss-nested@^6.0.1`, and `postcss-nested@6.2.0`
 (the last 6.x) pins `postcss-selector-parser@^6.1.1`. No 6.x parser has
-the fix, so no in-range update exists. `postcss-nested@7` changes only its
-parser range (`^7.0.0`) and Node floor (`>=18`); the repo runs Node 24.
-The override is on `postcss-nested`, not on the parser, so every package
-still gets a parser inside its own declared range. 7.0.2 rather than 8.x
-because 8 only narrows the Node range further. Verified after
+the fix, so no in-range update exists. Per its changelog,
+`postcss-nested@7.0.0` moves the parser range to `^7.0.0`, drops Node 12 to
+16 (the repo runs Node 24), and changes when comments are moved out of
+nested rules; 7.0.1 and 7.0.2 are fixes. The override is on
+`postcss-nested`, not on the parser, so every package still gets a parser
+inside its own declared range. 7.0.2 rather than 8.x because 8 also moves
+the package to ESM and drops Node 18 and 20. Verified after
 `npm run build`: 26 pages under `dist/` render `class="expressive-code`
 blocks, and the emitted CSS has flattened `.expressive-code …` selectors,
 so the plugin still nests correctly.
