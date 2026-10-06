@@ -4,23 +4,26 @@ Tracking the `npm audit` state and the reasoning behind what is fixed versus
 accepted. Issue #123 asked for the residual risk to be a documented conclusion
 rather than an assumption, so this file records that.
 
-Last reviewed: 2026-10-05
+Last reviewed: 2026-10-06
 
 ## Current state
 
 `npm audit` reports **12 advisories** (all high): two roots with no patched
 release, `braces` and `node-forge`, plus ten chain entries flagged only for
 depending on them. Both roots are accepted until **2026-11-05**; see
-"Re-triaged 2026-10-05" below. Earlier clears: `sharp` on 2026-09-10 and
-`toml` on 2026-09-05 (`overrides`), `image-size` and `extract-zip` on
-2026-09-02 (the `@netlify/vite-plugin` override).
+"Re-triaged 2026-10-05" below. Three new roots that appeared on 2026-10-06
+(`postcss-selector-parser`, `sharp`, `source-map-js`) are fixed, not
+accepted; see "Re-triaged 2026-10-06". Earlier clears: `sharp` on
+2026-09-10 and `toml` on 2026-09-05 (`overrides`), `image-size` and
+`extract-zip` on 2026-09-02 (the `@netlify/vite-plugin` override).
 
 ## What was fixed
 
 | Package | Action | Result |
 | --- | --- | --- |
 | `@netlify/blobs` | bumped `^10.7.2` → `^11.0.1` | direct fix; cleared |
-| `sharp` | `overrides` → `^0.35.4` | libheif advisory required `>=0.35.4`; cleared |
+| `sharp` | `overrides` → `^0.35.5` | libheif advisory required `>=0.35.4`, librsvg advisory `>=0.35.5`; cleared |
+| `postcss-nested` | `overrides` → `^7.0.2` | pulls `postcss-selector-parser` 7.1.6 (quadratic parsing); cleared |
 | `picomatch` | `overrides` → `^4.0.5` | ReDoS + method injection; cleared |
 | `nanoid` | `overrides` → `^5.1.6` | zero-size infinite loop; cleared |
 | `fast-uri` | `overrides` → `^3.1.6` | 4 SSRF/host-confusion; cleared |
@@ -109,6 +112,59 @@ import of `ipx` or `@netlify/images`. `braces` expands globs in the bundler
 
 Revisit by 2026-11-05, or sooner when `braces` or `node-forge` publishes a
 fix (the check reports it) or netlify/framework-adapters#47 lands.
+
+## Re-triaged 2026-10-06 — `postcss-selector-parser`, `sharp`, `source-map-js`
+
+`build` was red on `main` from 2026-10-06 15:15Z: `npm audit` reported 23
+advisories, 11 of them outside the baseline. Those 11 are three roots and
+eight chain entries. All three roots have a patched release, so all three
+are fixed and nothing new is accepted. `npm audit` is back to the 12
+accepted entries above.
+
+| Advisory | Package | Severity | Resolution |
+| --- | --- | --- | --- |
+| [GHSA-rj75-hqrm-r3gf](https://github.com/advisories/GHSA-rj75-hqrm-r3gf) | `postcss-selector-parser` | moderate | fixed: `overrides` `postcss-nested` → `^7.0.2`, which pulls 6.1.4 → 7.1.6 |
+| [GHSA-wq5f-xc86-pv6w](https://github.com/advisories/GHSA-wq5f-xc86-pv6w) | `sharp` | high | fixed: lockfile 0.35.4 → 0.35.5, override floor raised to `^0.35.5` |
+| [GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q) | `source-map-js` | high | fixed: lockfile 1.2.1 → 1.2.2 |
+
+The eight chain entries (`postcss-nested`, `@expressive-code/core`,
+`@expressive-code/plugin-frames`, `@expressive-code/plugin-shiki`,
+`@expressive-code/plugin-text-markers`, `expressive-code`,
+`rehype-expressive-code`, `astro-expressive-code`) were flagged only for
+depending on `postcss-selector-parser`, and cleared with it:
+
+```text
+astro-expressive-code → rehype-expressive-code → expressive-code
+  → @expressive-code/core → postcss-nested → postcss-selector-parser
+```
+
+`sharp` and `source-map-js` were in-range updates
+(`npm update sharp source-map-js --package-lock-only`). The lockfile diff
+touches only those two and sharp's `@img/*` platform binaries. The `sharp`
+floor goes to `^0.35.5` for the same reason as on 2026-09-10: the caret
+already allowed the fix, so the floor keeps a fresh resolve from going back.
+This is the librsvg advisory (CVE-2026-96889), a different one from the
+libheif advisory above.
+
+**Why `postcss-nested` needs an override.** `@expressive-code/core@0.44.2`
+(the latest) depends on `postcss-nested@^6.0.1`, and `postcss-nested@6.2.0`
+(the last 6.x) pins `postcss-selector-parser@^6.1.1`. No 6.x parser has
+the fix, so no in-range update exists. `postcss-nested@7` changes only its
+parser range (`^7.0.0`) and Node floor (`>=18`); the repo runs Node 24.
+The override is on `postcss-nested`, not on the parser, so every package
+still gets a parser inside its own declared range. 7.0.2 rather than 8.x
+because 8 only narrows the Node range further. Verified after
+`npm run build`: 26 pages under `dist/` render `class="expressive-code`
+blocks, and the emitted CSS has flattened `.expressive-code …` selectors,
+so the plugin still nests correctly.
+
+`npm audit fix --force` was not used. It proposes the same rejected
+downgrades as before: `astro-expressive-code` 0.44.2 → 0.34.2 and
+`@astrojs/netlify` 8.2.6 → 6.4.1.
+
+Verified: `scripts/check-audit-baseline.sh` → passed, `npm audit` → 12
+(the accepted set), `npm run check` → 0 errors, `npm run build` →
+succeeds, `scripts/verify-build-output.sh` → passed.
 
 ## The `toml` override
 
