@@ -1,0 +1,20 @@
+name: Netlify Site Checks
+
+# Replaces build.yml's preview-acceptance job; runs the script on PR previews and on the production deploy of each push to main.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  statuses: read
+
+jobs:
+  netlify-site-checks:
+    uses: smartwatermelon/github-workflows/.github/workflows/netlify-site-checks.yml@netlify-site-checks-v1
+    with:
+      netlify-site: projectinsomnia
+      check-script: scripts/verify-deploy-preview.sh
+    secrets:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
