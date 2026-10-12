@@ -15,7 +15,7 @@ depending on them. Both roots are accepted until **2026-11-05**; see
 (`postcss-selector-parser`, `sharp`, `source-map-js`) are fixed, not
 accepted; see "Re-triaged 2026-10-06". Earlier clears: `sharp` on
 2026-09-10 and `toml` on 2026-09-05 (`overrides`), `image-size` and
-`extract-zip` on 2026-09-02 (the `@netlify/vite-plugin` override).
+`extract-zip` on 2026-09-02 (the `@netlify/vite-plugin` override, since replaced by `@astrojs/netlify` `^8.2.7`).
 
 ## What was fixed
 
@@ -28,7 +28,7 @@ accepted; see "Re-triaged 2026-10-06". Earlier clears: `sharp` on
 | `nanoid` | `overrides` → `^5.1.6` | zero-size infinite loop; cleared |
 | `fast-uri` | `overrides` → `^3.1.6` | 4 SSRF/host-confusion; cleared |
 | `ipx` | — | cleared transitively by the `sharp` override |
-| `@netlify/vite-plugin` | `overrides` → `^3.0.1` | cleared both roots + chain |
+| `@netlify/vite-plugin` | `@astrojs/netlify` `^8.2.7` (was an `overrides` entry until 2026-10-12) | cleared both roots + chain |
 
 `@netlify/blobs` 10 → 11 is a major bump. The three call sites
 (`netlify/functions/instagram-{feed,image,webhook}.mts`) use `getStore`,
@@ -389,10 +389,10 @@ Verified on Node 24 with a clean `node_modules`:
 - Top-level `@netlify/blobs` stays at 11.0.2, so the functions' own dependency
   is untouched by the chain move.
 
-`netlify/framework-adapters#47` is still the real fix: with `vite-plugin`'s
-range widened in `@astrojs/netlify`, this override becomes unnecessary and
-should be dropped. Until then it is load-bearing — removing it silently
-restores all 10 advisories.
+**Superseded 2026-10-12.** `@astrojs/netlify` 8.2.7 depends on
+`@netlify/vite-plugin ^3.0.1`, so this override was dropped and the
+adapter bump (`^8.2.7`) carries the fix. Upstream
+`netlify/framework-adapters#47` is closed.
 
 ### Re-triaged 2026-08-21
 

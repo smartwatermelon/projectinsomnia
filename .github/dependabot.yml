@@ -29,9 +29,8 @@ updates:
   # returns with the next advisory, so this ignore stays. Forward majors need
   # the deliberate upgrade project, not an unattended PR. See #123.
   #
-  # Note: the `@netlify/vite-plugin: ^3.0.1` override in package.json is what
-  # holds the audit at zero (see docs/SECURITY-AUDIT.md). Dependabot does not
-  # manage `overrides`, so it will not bump or drop that entry on its own.
+  # Note: `@astrojs/netlify` ^8.2.7 pulls `@netlify/vite-plugin` ^3.0.1, which
+  # is what holds the audit at zero (see docs/SECURITY-AUDIT.md).
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
