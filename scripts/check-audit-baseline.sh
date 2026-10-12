@@ -88,6 +88,13 @@ else
 fi
 echo
 
+# Vendored image-size is safe only without an image: block (see SECURITY-AUDIT.md).
+if grep -qE '^[[:space:]]*image[[:space:]]*:' astro.config.mjs; then
+  echo "❌ astro.config.mjs now has an image: block"
+  echo "     Revisit the vendored image-size section in ${BASELINE_DOC}."
+  FAILURES=$((FAILURES + 1))
+fi
+
 # --- Read the current advisory set -----------------------------------------
 AUDIT_JSON="$(npm audit --json 2>/dev/null || true)"
 if [[ -z "${AUDIT_JSON}" ]]; then
