@@ -10,9 +10,7 @@ permissions:
 
 jobs:
   dependabot-auto-merge:
-    # Pinned to v2.1.0 for the dev-env#120 pilot (allow_major). Return to
-    # @dependabot-auto-merge-v2 once that tag moves to include the input.
-    uses: smartwatermelon/github-workflows/.github/workflows/dependabot-auto-merge.yml@dependabot-auto-merge-v2.1.0
+    uses: smartwatermelon/github-workflows/.github/workflows/dependabot-auto-merge.yml@dependabot-auto-merge-v2
     with:
       trusted_namespaces: 'smartwatermelon'
       allow_major: true
