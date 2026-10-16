@@ -28,10 +28,8 @@ jobs:
         run: npm ci
 
       - name: Type-check
-        # `astro build` compiles .astro files without type-checking them, so
-        # this is the only step that reports type errors, unused imports, and
-        # template diagnostics. Hints do not affect the exit code; errors do.
-        # See issue #168.
+        # The only type-check (#168). tsc covers .ts files; .astro files
+        # wait on TypeScript 7.1 and @astrojs/ts-content-mapper.
         run: npm run check
 
       - name: Build site

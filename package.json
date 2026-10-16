@@ -9,7 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check",
+    "check": "astro sync && tsc --noEmit",
     "astro": "astro"
   },
   "dependencies": {
@@ -28,10 +28,12 @@
     "nanoid": "^5.1.6",
     "fast-uri": "^3.1.6",
     "toml": "^4.1.2",
-    "postcss-nested": "^7.0.2"
+    "postcss-nested": "^7.0.2",
+    "ts-api-utils": {
+      "typescript": "^5.9.3"
+    }
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.10",
-    "typescript": "^5.9.3"
+    "typescript": "^7.0.2"
   }
 }
