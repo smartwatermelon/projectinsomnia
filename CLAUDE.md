@@ -100,9 +100,15 @@ and fix the entry.
 - Use `npm run build` or `npx astro build` or
   `pnpm build` (project uses pnpm in some
   sessions); check `package.json` scripts if
-  unsure. `npx tsc --noEmit` for type-checking.
-- `npx astro check` also works for type/SSR
-  validation.
+  unsure. `npm run check` for type-checking
+  (`astro sync && tsc --noEmit`).
+- TypeScript 7 does not type-check `.astro`
+  files: `astro check` refuses TS 7, and its
+  replacement needs TS 7.1+.
+- The `ts-api-utils` override keeps the Netlify
+  adapter's `precinct` on TypeScript 5: TS 7
+  has no JS API, and a hoisted `ts-api-utils`
+  loading it breaks `astro build`.
 
 ## Worktrees
 
