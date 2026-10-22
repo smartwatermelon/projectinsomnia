@@ -199,6 +199,18 @@ clears the advisories and let npm resolve forward. It resolved to 4.3.0 on
 install, which clears both. Verified: `npm audit` → 0 vulnerabilities,
 `npm run build` → succeeds, `npx tsc --noEmit` → exit 0.
 
+**Raised to `^5.0.1` on 2026-10-22.** Three more advisories, all
+quadratic or unbounded CPU DoS in `toml.parse()` and all `<=5.0.0`, failed
+the baseline check:
+[GHSA-4qx8-w7c3-pj3p](https://github.com/advisories/GHSA-4qx8-w7c3-pj3p),
+[GHSA-9j65-hcg3-gc64](https://github.com/advisories/GHSA-9j65-hcg3-gc64),
+[GHSA-9qmh-m7c6-f92p](https://github.com/advisories/GHSA-9qmh-m7c6-f92p).
+5.0.1 (published 2026-10-12) is outside that range. It is still CommonJS
+with the same `parse(input, options)` entry point, so the one
+`zip-it-and-ship-it` call site is unaffected. Resolved to 5.0.1; verified:
+`scripts/check-audit-baseline.sh` → passed, `npm run build` → succeeds,
+`npm run check` → exit 0.
+
 ## The `fast-uri` override
 
 `fast-uri` appeared on 2026-09-02 as a new advisory outside the accepted
