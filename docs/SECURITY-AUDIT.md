@@ -202,7 +202,8 @@ Not in deployed code: after `npm run build`, no file in `dist/` or
 `.netlify/` names `deepmerge`.
 
 Verified: `scripts/check-audit-baseline.sh` → passed, `npm audit` → 5 low
-(the accepted set), `npm run check` → 0 errors, `npm run build` → succeeds.
+(the accepted set), `npm run check` → 0 errors, `npm run build` → succeeds,
+`grep -rlw deepmerge dist .netlify` → no files.
 
 ## The `toml` override
 
