@@ -4,14 +4,15 @@ Tracking the `npm audit` state and the reasoning behind what is fixed versus
 accepted. Issue #123 asked for the residual risk to be a documented conclusion
 rather than an assumption, so this file records that.
 
-Last reviewed: 2026-10-06
+Last reviewed: 2026-10-29
 
 ## Current state
 
-`npm audit` reports **12 advisories** (all high): two roots with no patched
-release, `braces` and `node-forge`, plus ten chain entries flagged only for
-depending on them. Both roots are accepted until **2026-11-05**; see
-"Re-triaged 2026-10-05" below. Three new roots that appeared on 2026-10-06
+`npm audit` reports **5 advisories** (all low): one root with no patched
+release, `deepmerge`, plus four chain entries flagged only for depending on
+it. The root is accepted until **2026-11-29**; see "Re-triaged 2026-10-29"
+below. `braces` and `node-forge`, accepted from 2026-10-05, are gone: one
+advisory was withdrawn and the other package was patched. Three new roots that appeared on 2026-10-06
 (`postcss-selector-parser`, `sharp`, `source-map-js`) are fixed, not
 accepted; see "Re-triaged 2026-10-06". Earlier clears: `sharp` on
 2026-09-10 and `toml` on 2026-09-05 (`overrides`), `image-size` and
@@ -167,6 +168,41 @@ downgrades as before: `astro-expressive-code` 0.44.2 → 0.34.2 and
 Verified: `scripts/check-audit-baseline.sh` → passed, `npm audit` → 12
 (the accepted set), `npm run check` → 0 errors, `npm run build` →
 succeeds, `scripts/verify-build-output.sh` → passed.
+
+## Re-triaged 2026-10-29 — `deepmerge`, `fast-uri`, `undici`, `zod`, `node-forge`
+
+`build` failed on PR #209 on 2026-10-29: `npm audit` reported five roots
+outside the baseline (`@netlify/config` and `deepmerge` are one chain).
+`main` last built green on 2026-10-22, before these advisories.
+
+| Advisory | Package | Severity | Resolution |
+| --- | --- | --- | --- |
+| fast-uri (4 advisories) | `fast-uri` | moderate | fixed: lockfile 3.1.8 → 3.1.9 |
+| undici (8 advisories) | `undici` | high | fixed: lockfile 8.11.2 → 8.12.3 |
+| Zod memory exhaustion | `zod` | high | fixed: lockfile 4.6.5 → 4.6.7 |
+| [GHSA-86w9-cpqp-85rv](https://github.com/advisories/GHSA-86w9-cpqp-85rv) and a new signature advisory | `node-forge` | high | fixed: lockfile 1.4.0 → 1.4.2; no longer accepted |
+| [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) | `braces` | high | withdrawn 2026-10-23; no longer accepted |
+| [GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4) | `deepmerge` | low | accepted, review by 2026-11-29 |
+
+The four fixes were one targeted in-range update
+(`npm update fast-uri undici zod node-forge --package-lock-only`, 24 lockfile
+lines). `npm audit fix` was not used: it rewrote about 1,300 lockfile lines.
+
+**Why `deepmerge` is accepted.** It has no patched release: the advisory's
+`first_patched_version` is null and the newest published version, 4.3.1, is
+affected. The only fix npm offers is the `@astrojs/netlify@6.4.1` downgrade
+rejected above. Path, build and dev tooling only:
+
+```text
+@astrojs/netlify → @netlify/vite-plugin → @netlify/dev
+  → @netlify/config → deepmerge
+```
+
+Not in deployed code: after `npm run build`, no file in `dist/` or
+`.netlify/` names `deepmerge`.
+
+Verified: `scripts/check-audit-baseline.sh` → passed, `npm audit` → 5 low
+(the accepted set), `npm run check` → 0 errors, `npm run build` → succeeds.
 
 ## The `toml` override
 
@@ -465,22 +501,15 @@ actual advisory that has no patched release upstream. A **chain** entry is
 reported by `npm audit` only because it depends on a root — not a distinct
 problem. Anything appearing in `npm audit` that is not listed here fails CI.
 
-The list holds two roots and ten chain entries, accepted until 2026-11-05
-(see "Re-triaged 2026-10-05"). When it empties again, replace the lines with
+The list holds one root and four chain entries, accepted until 2026-11-29
+(see "Re-triaged 2026-10-29"). When it empties again, replace the lines with
 a lone `none` sentinel: the script distinguishes it from a missing or
 malformed block, which is still an error.
 
 <!-- BEGIN ACCEPTED-BASELINE -->
 ```text
-root braces
-root node-forge
-chain fast-glob
-chain micromatch
-chain ipx
-chain listhen
-chain @netlify/images
-chain @netlify/zip-it-and-ship-it
-chain @netlify/functions-dev
+root deepmerge
+chain @netlify/config
 chain @netlify/dev
 chain @netlify/vite-plugin
 chain @astrojs/netlify
