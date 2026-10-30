@@ -16,7 +16,7 @@
     "@astrojs/mdx": "^8.1.1",
     "@astrojs/netlify": "^8.2.10",
     "@astrojs/rss": "^4.0.19",
-    "@astrojs/sitemap": "^3.7.4",
+    "@astrojs/sitemap": "^3.7.3",
     "@netlify/blobs": "^11.1.6",
     "astro": "^7.4.2",
     "astro-expressive-code": "^0.44.3",
