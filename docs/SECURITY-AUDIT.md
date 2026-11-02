@@ -11,7 +11,9 @@ Last reviewed: 2026-10-29
 `npm audit` reports **5 advisories** (all low): one root with no patched
 release, `deepmerge`, plus four chain entries flagged only for depending on
 it. The root is accepted until **2026-11-29**; see "Re-triaged 2026-10-29"
-below. `braces` and `node-forge`, accepted from 2026-10-05, are gone: one
+below. Two roots that appeared on 2026-10-31 (`minimatch`, `glob`) are
+fixed, not accepted; see "Re-triaged 2026-10-31". `braces` and `node-forge`,
+accepted from 2026-10-05, are gone: one
 advisory was withdrawn and the other package was patched. Three new roots that appeared on 2026-10-06
 (`postcss-selector-parser`, `sharp`, `source-map-js`) are fixed, not
 accepted; see "Re-triaged 2026-10-06". Earlier clears: `sharp` on
@@ -28,6 +30,8 @@ accepted; see "Re-triaged 2026-10-06". Earlier clears: `sharp` on
 | `picomatch` | `overrides` → `^4.0.5` | ReDoS + method injection; cleared |
 | `nanoid` | `overrides` → `^5.1.6` | zero-size infinite loop; cleared |
 | `fast-uri` | `overrides` → `^3.1.6` | 4 SSRF/host-confusion; cleared |
+| `glob` | `overrides` → `^14.0.3` | AbortSignal traversal bypass; cleared 2026-10-31 |
+| `minimatch` | `overrides` → `^11.0.3` | globparts amplification DoS; cleared 2026-10-31 |
 | `ipx` | — | cleared transitively by the `sharp` override |
 | `@netlify/vite-plugin` | `@astrojs/netlify` `^8.2.7` (was an `overrides` entry until 2026-10-12) | cleared both roots + chain |
 
@@ -204,6 +208,45 @@ Not in deployed code: after `npm run build`, no file in `dist/` or
 Verified: `scripts/check-audit-baseline.sh` → passed, `npm audit` → 5 low
 (the accepted set), `npm run check` → 0 errors, `npm run build` → succeeds,
 `grep -rlw deepmerge dist .netlify` → no files.
+
+## Re-triaged 2026-10-31 — `minimatch`, `glob`
+
+`build` failed on PR #215 on 2026-10-31: `npm audit` reported 16 entries,
+11 outside the baseline. They are two new roots and their chains. Both roots
+have a patched release, so both are fixed and nothing new is accepted.
+
+| Advisory | Package | Severity | Resolution |
+| --- | --- | --- | --- |
+| [GHSA-g3hv-75wg-m249](https://github.com/advisories/GHSA-g3hv-75wg-m249) | `minimatch` (`<11.0.1`) | moderate | fixed: `overrides` → `^11.0.3`; lockfile 10.2.6 → 11.0.3 |
+| [GHSA-3g3m-2fjr-6pw4](https://github.com/advisories/GHSA-3g3m-2fjr-6pw4) | `glob` (`>=9.0.0 <=14.0.1`) | moderate | fixed: `overrides` → `^14.0.3`; lockfile 13.0.6 → 14.0.3 |
+
+The nine chain entries (`@netlify/functions-dev`,
+`@netlify/zip-it-and-ship-it`, `@vercel/nft`, `archiver`, `readdir-glob`,
+`precinct`, `detective-typescript`, `detective-vue2`,
+`@typescript-eslint/typescript-estree`) were flagged only for depending on
+those two, and cleared with them.
+
+**Why overrides.** Every consumer pins the vulnerable major:
+`@vercel/nft@1.11.0` (the latest) wants `glob@^13`, and `glob@13`,
+`readdir-glob@3.0.0` (the latest), `@netlify/zip-it-and-ship-it@15` and
+`@typescript-eslint/typescript-estree@8` want `minimatch@^10`. No in-range
+update reaches a fix. An in-range `npm update` was tried: it rewrote about
+2,000 lockfile lines and cleared nothing. The only fix npm offers is the
+`@astrojs/netlify@6.2.2` downgrade, rejected as before. `glob@14` itself
+depends on `minimatch@^11` and `path-scurry@^3`, so the lockfile diff is those
+three packages and one new `glob` dependency
+(`@isaacs/nonrecursive-glob-match`). Both majors keep the same exports and
+Node engines (`18 || 20 || >=22`) as the versions they replace.
+
+Path, build and dev tooling only: `@vercel/nft` traces the SSR function's
+files at build time. After `npm run build`, no file in `dist/` or `.netlify/`
+names `minimatch`, `readdir-glob` or `archiver`.
+
+Verified with npm 11 (Node 24's): `npm ci` → ok, `npm run check` → ok,
+`npm run build` → succeeds, including "Bundling function", which runs
+`@vercel/nft` on `glob@14`; `scripts/verify-build-output.sh` → passed;
+`scripts/check-audit-baseline.sh` → passed; `npm audit` → 5 low (the
+accepted `deepmerge` set).
 
 ## The `toml` override
 
