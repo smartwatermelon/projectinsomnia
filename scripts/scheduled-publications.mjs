@@ -1,23 +1,25 @@
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, extname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { parse as parseYaml } from "yaml";
 
 function publicationDate(value) {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+  if (typeof value !== "string") {
     return undefined;
   }
 
-  const date = new Date(`${value}T00:00:00.000Z`);
-  return Number.isNaN(date.valueOf()) || date.toISOString().slice(0, 10) !== value
-    ? undefined
-    : date;
+  const date = new Date(
+    /^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00:00.000Z` : value,
+  );
+  return Number.isNaN(date.valueOf()) ? undefined : date;
 }
 
 export function pendingPublications(publications, buildTime) {
   return publications
     .filter(({ date, draft }) => {
       const publicationDateValue = publicationDate(date);
-      return draft !== true && publicationDateValue && publicationDateValue > buildTime;
+      const isDraft = draft === true || draft === "true";
+      return !isDraft && publicationDateValue && publicationDateValue > buildTime;
     })
     .map(({ date }) => publicationDate(date).toISOString())
     .sort();
@@ -31,13 +33,8 @@ function frontmatter(source) {
   const match = source.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!match) return {};
 
-  const fields = {};
-  for (const line of match[1].split(/\r?\n/)) {
-    const field = line.match(/^(date|draft):\s*(.*?)\s*$/);
-    if (!field) continue;
-    fields[field[1]] = field[2].replace(/^['"]|['"]$/g, "");
-  }
-  return { date: fields.date, draft: fields.draft === "true" };
+  const fields = parseYaml(match[1]);
+  return fields && typeof fields === "object" ? fields : {};
 }
 
 async function contentFiles(directory) {

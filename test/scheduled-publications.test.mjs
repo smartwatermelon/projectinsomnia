@@ -51,8 +51,12 @@ test("writes a manifest from the current content tree", async () => {
         "---\ntitle: Future\ndate: 2026-11-06\ndraft: false\n---\n",
       ),
       writeFile(
+        join(contentDirectory, "blog", "future-with-time.md"),
+        '---\ntitle: Future with time\ndate: "2026-11-06T09:00:00Z"\ndraft: false\n---\n',
+      ),
+      writeFile(
         join(contentDirectory, "blog", "draft.md"),
-        "---\ntitle: Draft\ndate: 2026-11-06\ndraft: true\n---\n",
+        '---\ntitle: Draft\ndate: 2026-11-06\ndraft: "true"\n---\n',
       ),
       writeFile(
         join(contentDirectory, "blog", "published.md"),
@@ -72,7 +76,10 @@ test("writes a manifest from the current content tree", async () => {
     } catch (error) {
       if (error.code !== "ENOENT") throw error;
     }
-    assert.deepEqual(manifest, ["2026-11-06T00:00:00.000Z"]);
+    assert.deepEqual(manifest, [
+      "2026-11-06T00:00:00.000Z",
+      "2026-11-06T09:00:00.000Z",
+    ]);
   } finally {
     await rm(root, { force: true, recursive: true });
   }
