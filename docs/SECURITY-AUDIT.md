@@ -4,17 +4,18 @@ Tracking the `npm audit` state and the reasoning behind what is fixed versus
 accepted. Issue #123 asked for the residual risk to be a documented conclusion
 rather than an assumption, so this file records that.
 
-Last reviewed: 2026-10-29
+Last reviewed: 2026-11-16
 
 ## Current state
 
-`npm audit` reports **5 advisories** (all low): one root with no patched
-release, `deepmerge`, plus four chain entries flagged only for depending on
-it. The root is accepted until **2026-11-29**; see "Re-triaged 2026-10-29"
-below. Two roots that appeared on 2026-10-31 (`minimatch`, `glob`) are
-fixed, not accepted; see "Re-triaged 2026-10-31". `braces` and `node-forge`,
-accepted from 2026-10-05, are gone: one
-advisory was withdrawn and the other package was patched. Three new roots that appeared on 2026-10-06
+`npm audit` reports **0 vulnerabilities**, and the accepted baseline is
+empty again (`none`). Two roots that appeared by 2026-11-16
+(`fast-xml-parser`, `node-forge`) are fixed, not accepted, and `deepmerge`,
+accepted from 2026-10-29, is gone; see "Re-triaged 2026-11-16" below. Two
+roots that appeared on 2026-10-31 (`minimatch`, `glob`) are fixed, not
+accepted; see "Re-triaged 2026-10-31". `braces` and `node-forge`, accepted
+from 2026-10-05, are gone: one advisory was withdrawn and the other package
+was patched. Three new roots that appeared on 2026-10-06
 (`postcss-selector-parser`, `sharp`, `source-map-js`) are fixed, not
 accepted; see "Re-triaged 2026-10-06". Earlier clears: `sharp` on
 2026-09-10 and `toml` on 2026-09-05 (`overrides`), `image-size` and
@@ -208,6 +209,29 @@ Not in deployed code: after `npm run build`, no file in `dist/` or
 Verified: `scripts/check-audit-baseline.sh` → passed, `npm audit` → 5 low
 (the accepted set), `npm run check` → 0 errors, `npm run build` → succeeds,
 `grep -rlw deepmerge dist .netlify` → no files.
+
+## Re-triaged 2026-11-16 — `fast-xml-parser`, `node-forge`, `deepmerge`
+
+`build` failed twice on Dependabot PR #229 on 2026-11-16. `npm audit` on
+`main` showed the same two new roots, so the PR did not cause them. Both
+have a patched release inside the range their consumer declares, so both
+are fixed with an in-range lockfile update and nothing new is accepted.
+
+| Advisory | Package | Severity | Resolution |
+| --- | --- | --- | --- |
+| [GHSA-474x-hrwr-fgx4](https://github.com/advisories/GHSA-474x-hrwr-fgx4) | `fast-xml-parser` (`<=5.11.2`) | low | fixed: lockfile 5.10.1 → 5.12.1 |
+| [GHSA-6889-vf6x-f3g5](https://github.com/advisories/GHSA-6889-vf6x-f3g5), [GHSA-w4xr-hqv8-ch44](https://github.com/advisories/GHSA-w4xr-hqv8-ch44), [GHSA-6cv4-p8m7-4r25](https://github.com/advisories/GHSA-6cv4-p8m7-4r25), [GHSA-j8rw-jp99-435v](https://github.com/advisories/GHSA-j8rw-jp99-435v) | `node-forge` (`<=1.4.2`) | low to moderate | fixed: lockfile 1.4.2 → 1.4.3 |
+| [GHSA-gcqx-w48m-w2h4](https://github.com/advisories/GHSA-gcqx-w48m-w2h4) | `deepmerge` | low | gone from `npm audit`; retired from the baseline |
+
+`@astrojs/rss` declares `fast-xml-parser: ^5.5.7` and `listhen` declares
+`node-forge: ^1.4.0`, so `npm update fast-xml-parser node-forge` reaches
+both fixes without an override. The lockfile diff is those two packages and
+three of `fast-xml-parser`'s own dependencies (`@nodable/entities` 3.1.0,
+`fast-xml-builder` 1.3.2, `is-unsafe` 2.0.3). Every new version was
+published at least 3 days before this change.
+
+`deepmerge` no longer appears in `npm audit`, so its root and four chain
+lines are deleted and the baseline is `none`.
 
 ## Re-triaged 2026-10-31 — `minimatch`, `glob`
 
@@ -545,18 +569,13 @@ actual advisory that has no patched release upstream. A **chain** entry is
 reported by `npm audit` only because it depends on a root — not a distinct
 problem. Anything appearing in `npm audit` that is not listed here fails CI.
 
-The list holds one root and four chain entries, accepted until 2026-11-29
-(see "Re-triaged 2026-10-29"). When it empties again, replace the lines with
-a lone `none` sentinel: the script distinguishes it from a missing or
-malformed block, which is still an error.
+The list is empty as of 2026-11-16 (see "Re-triaged 2026-11-16"), so it
+holds the lone `none` sentinel: the script distinguishes it from a missing
+or malformed block, which is still an error.
 
 <!-- BEGIN ACCEPTED-BASELINE -->
 ```text
-root deepmerge
-chain @netlify/config
-chain @netlify/dev
-chain @netlify/vite-plugin
-chain @astrojs/netlify
+none
 ```
 <!-- END ACCEPTED-BASELINE -->
 
