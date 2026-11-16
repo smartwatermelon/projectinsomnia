@@ -26,6 +26,9 @@ pnpm-debug.log*
 # Local Netlify folder
 .netlify
 
+# Build-time manifest of future-dated content.
+netlify/functions/scheduled-publications.json
+
 
 # Claude Code local state and the generated .claude/ scaffold.
 # Share a file by negating it: .claude/* then !.claude/<path>

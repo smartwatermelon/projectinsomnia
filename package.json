@@ -7,9 +7,10 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "node scripts/scheduled-publications.mjs && astro build",
     "preview": "astro preview",
-    "check": "astro sync && tsc --noEmit",
+    "check": "node scripts/scheduled-publications.mjs && astro sync && tsc --noEmit",
+    "test": "node --test",
     "astro": "astro"
   },
   "dependencies": {
