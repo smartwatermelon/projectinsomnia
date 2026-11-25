@@ -28,6 +28,7 @@ function goodSite() {
     "/about/": html(page("About")),
     "/projects/": html(page("Projects")),
     "/now/": html(nowHtml()),
+    "/subscribe/": html(page("Subscribe")),
     "/4338ca/twistedmelonman": { status: 200, type: "image/svg+xml", body: "<svg/>" },
     "/api/github-feed": json({ items: [{ title: "pushed repo", link: "https://github.com/x/y" }] }),
     "/api/instagram-feed": json({ posts: [{ imageUrl: "/api/instagram-image/abc", postUrl: "https://instagr.am/p/abc/" }] }),

@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Subscribe" description="Get an email when a new post goes up on projectinsomnia.com.">
+  <h1>Subscribe</h1>
+
+  <p>
+    I'll email you when a new post goes up. Nothing else. Buttondown sends it,
+    and every message has an unsubscribe link.
+  </p>
+
+  <form name="subscribe" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/subscribe/thanks/">
+    <input type="hidden" name="form-name" value="subscribe" />
+    <p hidden>
+      <label>Leave this empty: <input name="bot-field" /></label>
+    </p>
+    <label for="email">Email address</label>
+    <input type="email" id="email" name="email" required autocomplete="email" />
+    <button type="submit">Subscribe</button>
+  </form>
+
+  <p>Prefer a feed reader? Use the <a href="/rss.xml">RSS feed</a>.</p>
+</BaseLayout>
+
+<style>
+  form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+  }
+
+  form label[for="email"] {
+    flex-basis: 100%;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+  }
+
+  input[type="email"] {
+    flex: 1 1 16rem;
+    max-width: 24rem;
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 3px;
+    padding: 0.5em 0.75em;
+    color: var(--color-text);
+  }
+
+  button {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    background: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    border-radius: 3px;
+    padding: 0.5em 1.1em;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+  }
+</style>
