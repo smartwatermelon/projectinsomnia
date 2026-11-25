@@ -4,7 +4,7 @@ Tracking the `npm audit` state and the reasoning behind what is fixed versus
 accepted. Issue #123 asked for the residual risk to be a documented conclusion
 rather than an assumption, so this file records that.
 
-Last reviewed: 2026-11-16
+Last reviewed: 2026-11-25
 
 ## Current state
 
@@ -389,8 +389,9 @@ if `anymatch` or `picomatch` move. See issue #126.
 > **Historical.** These 10 were cleared by the `@netlify/vite-plugin` override;
 > nothing in this section is still accepted. It is kept because the exposure
 > assessment records why the risk was tolerable while it stood, and because the
-> "Astro vendors its own `image-size`" subsection below is **still live** — that
-> copy is private to Astro and was never part of this baseline.
+> "Astro vendors its own `image-size`" subsection below was live until
+> 2026-11-25, when Astro's private copy gained the fix. That copy was never
+> part of this baseline.
 
 All 10 traced to two transitive packages with no fixed release published
 upstream at the time — both reported an affected range of `*`, meaning every
@@ -607,6 +608,16 @@ declares the same `@netlify/vite-plugin: ^2.12.3`, which already resolves to
 2.12.9. Hygiene only, not a fix.
 
 #### Astro vendors its own `image-size`, invisible to this baseline
+
+> **Resolved 2026-11-25.** Astro's private copy has the zero-length guards in
+> its ICNS, HEIF and JXL loops in 7.4.13 (the locked version), and in 7.3.8
+> too; the first Astro release with them was not identified. Each loop now
+> breaks on a too-small entry or box and on an offset that does not advance.
+> A crafted ICNS header with one zero-length entry returns "Invalid ICNS, no
+> sizes found" at once; the same input hangs upstream 2.0.2 for the full
+> 10-second test timeout. Upstream `image-size` fixed both advisories in 2.0.3, and
+> `npm ls` shows neither `image-size` nor `extract-zip` installed. The text
+> below is the record from before the fix.
 
 `node_modules/astro/dist/assets/utils/vendor/image-size/` is a private copy that
 **ships in the deployed SSR bundle**. `npm audit` cannot see it, the `overrides`
