@@ -5,6 +5,8 @@ description: "macOS locks the login keychain when there's no GUI login, which qu
 tags: ["pinned", "tech", "security", "macos", "ssh", "1password"]
 ---
 
+Update, November 2026: the design below still works. The wrapper now reuses the ssh master instead of prompting on every connection. One caveat near the end also turned out to be wrong. The follow-up covers both: [Caching the SSH Connection Instead of the Keychain Password](/blog/caching-ssh-connection-not-keychain-password/).
+
 ## The Broken Thing
 
 You can ssh into a Mac. That part works. What doesn't work, and doesn't advertise that it doesn't work, is the login keychain. On any Mac that's only ever been logged into over ssh — typical for a headless Mac mini used as a build server, test node, or "spare computer I keep around to run things" — the login keychain sits locked forever. Every tool that depends on it fails in some confusing way.
@@ -214,7 +216,7 @@ The invariants held up:
 - Password never on disk on either side (piped through stdin).
 - Password never in env on either side.
 - Password never in shell history on either side.
-- One TouchID prompt per ssh connection.
+- ~~One TouchID prompt per ssh connection.~~ No longer current. The wrapper now reuses the master, so it's one prompt per host per `ControlPersist` idle window, 4h by default. [The follow-up](/blog/caching-ssh-connection-not-keychain-password/) explains why, and what that costs.
 
 ---
 
@@ -222,7 +224,7 @@ The invariants held up:
 
 Unlocking the login keychain over ssh is powerful but coarse. It grants the ssh session access to *every* secret in that keychain, not just the one you needed. For a single-user Mac that you own, that's almost certainly fine — it's functionally the same authorization surface you have when you sit in front of the machine. For a shared server or a production service, you'd want a per-secret auth story via a service-account tool instead.
 
-The master ssh connection persists for the session duration plus sixty seconds after disconnect. If something kills the master prematurely (network blip, explicit `-O exit` from another terminal, box sleeps), subsequent keychain operations in that session fail until the next ssh re-runs the unlock. In practice I haven't noticed this; macOS keeps the login keychain unlocked until sleep regardless of whether our master is still alive, so a dropped master tends not to matter until the next session anyway.
+The master ssh connection is what holds the unlock open. As first written here, it persisted for the session plus sixty seconds after disconnect. The current wrapper keeps it for hours and reuses it. Something can still kill the master: a network blip, an explicit `-O exit` from another terminal, or the box going to sleep. Keychain operations then fail until the next ssh re-runs the unlock. This caveat used to say a dropped master didn't much matter, because macOS keeps the login keychain unlocked until sleep either way. That was wrong. I measured it on 2026-09-10: the unlock is scoped to the sshd session, not the machine. A fresh session a moment later, bypassing the master with `-S none`, found the keychain locked. [The follow-up](/blog/caching-ssh-connection-not-keychain-password/) has the measurement and what it changes.
 
 ---
 
@@ -288,6 +290,8 @@ That invariant was implicit before — accidentally satisfied by the assumption 
 - The tradeoff — losing the convenience on password-only hosts — is acceptable for the design's intended scope.
 
 The fix is a five-token diff. The reasoning behind it is the rest of this postscript.
+
+The wrapper changed again in September, after an agent started using it. [Caching the SSH Connection Instead of the Keychain Password](/blog/caching-ssh-connection-not-keychain-password/) covers what changed and corrects the master-dropout caveat above.
 
 ---
 
