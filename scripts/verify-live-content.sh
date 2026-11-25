@@ -82,9 +82,10 @@ declare -A HEADINGS=(
   ["/about/"]="About"
   ["/projects/"]="Projects"
   ["/now/"]="Now"
+  ["/subscribe/"]="Subscribe"
 )
 NOW_HTML=""
-for route in "/" "/blog/" "/about/" "/projects/" "/now/"; do
+for route in "/" "/blog/" "/about/" "/projects/" "/now/" "/subscribe/"; do
   resp=$(get "${BASE_URL}${route}")
   code=$(status_of "${resp}")
   html=$(body_of "${resp}")

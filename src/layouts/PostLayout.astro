@@ -53,6 +53,10 @@ const back = backLinks[collection];
     <div class="prose">
       <slot />
     </div>
+
+    {collection === 'blog' && (
+      <p class="subscribe-link"><a href="/subscribe/">Get new posts by email</a></p>
+    )}
   </article>
 </BaseLayout>
 
@@ -154,6 +158,13 @@ const back = backLinks[collection];
   }
 
   .prose { line-height: 1.8; }
+
+  .subscribe-link {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+    font-size: 0.9rem;
+  }
 
   .prose :global(h2:first-child),
   .prose :global(h3:first-child) {

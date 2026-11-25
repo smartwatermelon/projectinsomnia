@@ -134,6 +134,21 @@ else
   pass "homepage links to individual blog posts"
 fi
 
+# --- Check 5: the subscribe form is detectable by Netlify ------------------
+# A lost attribute drops signups silently.
+SUBSCRIBE="${DIST}/subscribe/index.html"
+if [[ ! -f "${SUBSCRIBE}" ]]; then
+  fail "${SUBSCRIBE} was not generated"
+else
+  for needle in 'data-netlify="true"' 'name="subscribe"' 'name="email"' 'name="bot-field"'; do
+    if grep -qF "${needle}" "${SUBSCRIBE}"; then
+      pass "subscribe form has ${needle}"
+    else
+      fail "subscribe form is missing ${needle}"
+    fi
+  done
+fi
+
 echo
 if [[ "${FAILURES}" -gt 0 ]]; then
   echo "Build output verification FAILED (${FAILURES} problem(s))."

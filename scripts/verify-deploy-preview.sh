@@ -54,6 +54,7 @@ ROUTES=(
   "/now/"
   "/projects/"
   "/about/"
+  "/subscribe/"
   "/rss.xml"
   "/blog/five-races/"
 )
