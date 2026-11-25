@@ -3,7 +3,7 @@ import Parser from "rss-parser";
 
 const API = "https://api.buttondown.com/v1";
 
-// Posts dated before this day are never emailed. Task 5 sets the final value.
+// Posts dated before this day (the launch) are never emailed.
 export const LAUNCH_DATE = "2026-11-25";
 
 // Buttondown docs, api-emails-create: "about_to_send: This email has been
