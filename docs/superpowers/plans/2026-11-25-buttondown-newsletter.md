@@ -4,77 +4,39 @@
 
 **Goal:** Readers subscribe on `/subscribe`; each new `blog` post gets one teaser email sent automatically after it is live.
 
-**Architecture:** One shared Buttondown API client (`scripts/buttondown.mjs`) used by two consumers: a Netlify `submission-created` event function (signup) and a Node sender script run by a GitHub Action that reads the live `rss.xml` (sending). Buttondown's email list is the only record of what was sent.
+**Architecture:** Two small, separate pieces. Signup: a Netlify Form plus a `submission-created` function that passes the address to Buttondown, so a provider change is one function and one env var. Sending: one Node script, run by a GitHub Action, that reads the live `rss.xml` and uses Buttondown's email list as the record of what was sent.
 
-**Tech Stack:** Astro 7 static pages, Netlify Forms, Netlify Functions v2 (`export default async (req) => …`), Node 24 (`node --test`), `rss-parser`, GitHub Actions, Buttondown REST API v1.
+**Tech Stack:** Astro 7 static pages, Netlify Forms, Netlify Functions v2, Node 24 (`node --test`), `rss-parser`, GitHub Actions, Buttondown REST API v1.
 
 **Spec:** `docs/superpowers/specs/2026-11-25-buttondown-newsletter-design.md`
 
-**Worktree:** `/Users/andrewrich/Developer/projectinsomnia/.claude/worktrees/newsletter`, branch `claude/feat-buttondown-newsletter-97f81b5d`. All paths below are relative to it. Commits need the sandbox disabled (see the session notes); every commit runs the review hooks.
+**Prior art followed:** Buttondown's tutorial <https://www.buttondown.com/blog/netlify> (signup function); kebab.tax `netlify/functions/submission-created.mjs` (v2 handler shape: `export default async (req) => { const { payload } = await req.json(); … }`). No free off-the-shelf tool sends automatically, so the sender is custom and kept small.
+
+**Worktree:** `/Users/andrewrich/Developer/projectinsomnia/.claude/worktrees/newsletter`, branch `claude/feat-buttondown-newsletter-97f81b5d`. Paths are relative to it. Every commit runs the review hooks.
 
 ## Global Constraints
 
 - Free Buttondown tier only. No paid add-ons, no `tags`, no analytics.
 - Only the `blog` collection is emailed; `ouatrevisit` and `elections` never.
 - Nothing scheduled may start a Netlify build or deploy; no workflow pushes or commits.
-- API base: `https://api.buttondown.com/v1`; auth header `Authorization: Token <key>`.
-- Secret name everywhere: `BUTTONDOWN_API_KEY` (GitHub secret, set; Netlify env var, Task 6).
+- API base `https://api.buttondown.com/v1`; header `Authorization: Token <key>`; secret name `BUTTONDOWN_API_KEY` (GitHub secret is set; Netlify env var in Task 5).
 - Never log a full email address or an IP address.
-- Shell scripts: Bash 5, `shellcheck -S info` clean, no `# shellcheck disable`.
-- Comments obey the 140-character length-caps hook; text files end with a newline.
-- Public copy (page text) goes through `personify` and `docs/VOICE.md`; the text gate asks Andrew to approve it at commit.
+- No new dependencies. Use global `fetch` with `AbortSignal.timeout(20000)`.
+- Keep code small: tests cover the safety rules below, not every branch.
+- Shell: `shellcheck -S info` clean. Comments within the 140-character length cap. Files end with a newline.
+- Public copy goes through `personify` and `docs/VOICE.md`; the text gate asks Andrew to approve it.
 
 ## Review Focus
 
-1. A post with no `description` (RSS gives `""`): the email must still have a sensible body (the link alone), not a blank line or `undefined`. Test in Task 2.
-2. Two posts going live the same day: only the oldest is sent; the other goes the next day, never both, never neither. Test in Task 2.
-3. Buttondown's email list spanning several pages: a match on page 2 must still block a duplicate. Test in Task 1.
-4. A submission with a mixed-case or space-padded address (`" Andrew@Example.com "`): trimmed before sending; never rejected for case. Test in Task 4.
-5. The RSS fetch fails or returns zero items: the run fails loudly (exit 1), never "nothing to send, success". Test in Task 2.
+1. Two posts live the same day: only the older is sent; the other goes next day. Test in Task 1.
+2. A post with no `description`: the body is the link alone, not `undefined`. Test in Task 1.
+3. Buttondown's email list across several pages: a match on page 2 still blocks a duplicate. Test in Task 1.
+4. RSS fetch fails or has zero items: exit 1, never a silent "nothing to send". Test in Task 1.
+5. A space-padded address (`" a@b.co "`) is trimmed before it reaches Buttondown. Test in Task 3.
 
 ---
 
-### Task 1: Shared Buttondown client
-
-**Files:**
-
-- Create: `scripts/buttondown.mjs`
-- Test: `test/buttondown.test.mjs`
-
-**Interfaces:**
-
-- Produces:
-  - `createButtondownClient({ apiKey: string, fetch?: typeof fetch }) => client` (throws `Error("BUTTONDOWN_API_KEY is not set")` if `apiKey` is empty)
-  - `client.createSubscriber({ email: string, ipAddress?: string }) => Promise<"created" | "exists">`
-  - `client.listEmails() => Promise<Array<{ id: string, body: string, status: string, publish_date: string | null, creation_date: string }>>` (follows `next` across all pages)
-  - `client.sendEmail({ subject: string, body: string }) => Promise<{ id: string }>`
-  - `export const SEND_NOW_STATUS` (string; see Step 1)
-
-- [ ] **Step 1: Confirm the "send now" status string**
-
-  Read `https://docs.buttondown.com/api-emails-create` and `https://docs.buttondown.com/api-emails-introduction` (web-fetch agent). Find the exact `status` value that sends an email immediately on `POST /v1/emails`. The diagram names "About to send"; the expected literal is `about_to_send`. Record the quoted doc line in a comment above `SEND_NOW_STATUS`. If the docs give a different value, use it. If they do not settle it, stop and report.
-
-- [ ] **Step 2: Write the failing tests** in `test/buttondown.test.mjs`, using a stub `fetch` that records `(url, init)` and returns queued `Response` objects:
-  - `createSubscriber` POSTs `${base}/subscribers` with header `Authorization: Token k` and JSON body `{ email_address: "a@b.co" }`; 201 → `"created"`.
-  - with `ipAddress: "1.2.3.4"` the body is `{ email_address, ip_address: "1.2.3.4" }`; without it, no `ip_address` key.
-  - 400 → `"exists"`.
-  - 500 → rejects with an error whose message contains `500` and does NOT contain the email address.
-  - `listEmails` with page 1 `{ results: [e1], next: "<url2>" }` and page 2 `{ results: [e2], next: null }` → `[e1, e2]`, two GETs.
-  - `listEmails` non-200 → rejects.
-  - `sendEmail` POSTs `${base}/emails` with `{ subject, body, status: SEND_NOW_STATUS }`; 201 → `{ id }`; non-201 rejects.
-  - `createButtondownClient({ apiKey: "" })` throws.
-
-- [ ] **Step 3: Run, expect FAIL** — `node --test test/buttondown.test.mjs` → module not found.
-
-- [ ] **Step 4: Implement** `scripts/buttondown.mjs` to satisfy the tests. Default `fetch` is `globalThis.fetch`. Every request has a 20 s timeout (`AbortSignal.timeout(20000)`).
-
-- [ ] **Step 5: Run, expect PASS** — `node --test test/buttondown.test.mjs`.
-
-- [ ] **Step 6: Commit** — `git add scripts/buttondown.mjs test/buttondown.test.mjs`; message `feat(newsletter): add a Buttondown API client`, footer `Advances #105`.
-
----
-
-### Task 2: Sender script
+### Task 1: Sender script
 
 **Files:**
 
@@ -83,137 +45,115 @@
 
 **Interfaces:**
 
-- Consumes: `createButtondownClient`, `client.listEmails`, `client.sendEmail` (Task 1).
 - Produces:
-  - `export const LAUNCH_DATE` — ISO date string of the day this merges (set in Task 6; use `"2026-11-25"` until then).
-  - `selectPostToSend({ items, emails, launchDate, now }) => { item: RssItem | null, reason: string }` where `RssItem = { title, link, pubDate, contentSnippet? , content? }` from `rss-parser`, and `reason` is one of `"sent-today"`, `"nothing-new"`, `"send"`.
-  - `emailFor(item) => { subject: string, body: string }`
+  - `export const LAUNCH_DATE = "2026-11-25"` (final value set in Task 5)
+  - `export const SEND_NOW_STATUS` (Step 1)
+  - `selectPostToSend({ items, emails, launchDate, now }) => { item, reason }`, `reason` in `"send" | "sent-today" | "nothing-new"`. `items` are `rss-parser` items (`title`, `link`, `isoDate`, `contentSnippet`); `emails` are Buttondown email objects (`body`, `status`, `publish_date`, `creation_date`).
+  - `emailFor(item) => { subject, body }`
   - `run({ env, fetch, log, now }) => Promise<number>` (exit code)
 
-- [ ] **Step 1: Write the failing tests** in `test/send-newsletter.test.mjs`:
-  - items dated before `launchDate` are never selected.
-  - an item whose `link` appears in any email's `body` is skipped.
-  - with two eligible items, the one with the older `pubDate` is selected (Review Focus 2).
-  - an email with `status !== "draft"` whose `publish_date` (falling back to `creation_date`) is on the same UTC date as `now` → `{ item: null, reason: "sent-today" }`, even when an item is eligible.
-  - a draft email dated today does NOT count as sent today.
-  - no eligible items → `{ item: null, reason: "nothing-new" }`.
-  - `emailFor({ title: "T", link: "https://projectinsomnia.com/blog/x/", contentSnippet: "D" })` → `{ subject: "T", body: "D\n\n[Read it on projectinsomnia.com](https://projectinsomnia.com/blog/x/)\n" }`.
-  - `emailFor` with `contentSnippet: ""` → body is the link line only (Review Focus 1). `rss-parser` exposes `<description>` as `content` and `contentSnippet`; the implementation reads `contentSnippet ?? content ?? ""`. Confirm that mapping in Step 4 by parsing the real `dist/rss.xml` once.
-  - `run` with `DRY_RUN=1`: stub fetch serves an RSS XML fixture and an empty email list; result 0; no POST request recorded; log contains the subject.
-  - `run` when the email list call returns 500: result 1, no POST.
-  - `run` when the RSS fetch fails, or the feed has zero items: result 1 (Review Focus 5).
-  - `run` normal path: exactly one POST to `/emails`, result 0.
+- [ ] **Step 1: Confirm the send-now status.** Read `https://docs.buttondown.com/api-emails-create` and `https://docs.buttondown.com/api-emails-introduction`. Find the `status` value that sends immediately (expected `about_to_send`). Quote the doc line in a comment above `SEND_NOW_STATUS`. If the docs do not settle it, stop and report.
 
-- [ ] **Step 2: Run, expect FAIL** — `node --test test/send-newsletter.test.mjs`.
+- [ ] **Step 2: Write the failing tests** (stub `fetch` records requests and returns queued responses; RSS from a small XML fixture string):
+  - items older than `launchDate` are never selected;
+  - an item whose `link` is in an email `body` on page 2 of `GET /emails` (`next` URL) is skipped;
+  - two eligible items → the older `isoDate` is selected;
+  - a non-draft email whose `publish_date ?? creation_date` is the same UTC date as `now` → `reason: "sent-today"`; a draft dated today does not count;
+  - `emailFor({ title: "T", link: "https://projectinsomnia.com/blog/x/", contentSnippet: "D" })` → `{ subject: "T", body: "D\n\n[Read it on projectinsomnia.com](https://projectinsomnia.com/blog/x/)\n" }`; with `contentSnippet: ""` the body is the link line only;
+  - `run` with `DRY_RUN: "1"` → 0 and no POST; email-list 500 → 1 and no POST; RSS fetch failure or zero items → 1; normal path → exactly one `POST /emails` with `{ subject, body, status: SEND_NOW_STATUS }`, then 0.
 
-- [ ] **Step 3: Implement** `scripts/send-newsletter.mjs`. `run` fetches `env.SITE_URL ?? "https://projectinsomnia.com"` + `/rss.xml` with the injected `fetch`, parses with `new Parser().parseString(xml)`, and creates the client from `env.BUTTONDOWN_API_KEY`. Logs subject and link only. Guard the CLI entry the same way as `scripts/scheduled-publications.mjs` (`import.meta.url === pathToFileURL(process.argv[1]).href`) and `process.exit(await run({ env: process.env, fetch, log: console.log, now: new Date() }))`.
+- [ ] **Step 3: Run, expect FAIL** — `node --test test/send-newsletter.test.mjs`.
 
-- [ ] **Step 4: Run, expect PASS**, then `npm test` (whole `test/` dir) — all pass.
+- [ ] **Step 4: Implement.** `run` reads `${env.SITE_URL ?? "https://projectinsomnia.com"}/rss.xml`, parses it with `new Parser().parseString()`, lists all email pages, calls `selectPostToSend`, logs subject and link only, and POSTs unless `DRY_RUN`. CLI guard as in `scripts/scheduled-publications.mjs`. Check once that `rss-parser` maps `<description>` to `contentSnippet` by parsing the built `dist/rss.xml`.
 
-- [ ] **Step 5: Commit** — the two files; message `feat(newsletter): send one email per new blog post`, footer `Advances #105`.
+- [ ] **Step 5: Run, expect PASS** — `npm test`.
+
+- [ ] **Step 6: Commit** — message `feat(newsletter): send one email per new blog post`, footer `Advances #105`.
 
 ---
 
-### Task 3: Newsletter workflow
+### Task 2: Newsletter workflow
 
 **Files:**
 
 - Create: `.github/workflows/newsletter.yml`
 
-**Interfaces:**
+- [ ] **Step 1: Write the workflow.**
+  - Triggers: `workflow_run` of `"Netlify Site Checks"` (`types: [completed]`, `branches: [main]`); `schedule: '47 13 * * *'`; `workflow_dispatch` with boolean input `dry_run`, default `true`.
+  - `permissions: {}`; `concurrency: { group: newsletter, cancel-in-progress: false }`.
+  - Job `send` (`permissions: contents: read`): runs for `schedule` and `workflow_dispatch`, and for `workflow_run` only when its `conclusion == 'success'` and `event == 'push'`. Steps: checkout and setup-node pinned exactly as in `build.yml`, `npm ci`, `node scripts/send-newsletter.mjs` with `BUTTONDOWN_API_KEY` from secrets and `DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}`.
+  - Job `report`: the `report` job from `site-health.yml`, `needs: send`, title `Newsletter send failed`.
+  - One-line header comment: no Netlify token, hook or push; reads `rss.xml` only.
 
-- Consumes: `node scripts/send-newsletter.mjs` (Task 2), env `BUTTONDOWN_API_KEY`, `DRY_RUN`.
-
-- [ ] **Step 1: Write the workflow** with:
-  - `on.workflow_run: { workflows: ["Netlify Site Checks"], types: [completed], branches: [main] }`
-  - `on.schedule: - cron: '47 13 * * *'` (comment: 47 minutes after the 13:00 UTC scheduled rebuild)
-  - `on.workflow_dispatch.inputs.dry_run: { type: boolean, default: true }`
-  - `permissions: {}` at top; `concurrency: { group: newsletter, cancel-in-progress: false }`
-  - job `send`: `if:` true for `schedule` and `workflow_dispatch`, and for `workflow_run` only when `github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'`. `permissions: contents: read`. Steps: checkout (SHA-pinned `actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7`, `persist-credentials: false`), setup-node (`actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7`, `node-version-file: .nvmrc`, `cache: npm`), `npm ci`, then `node scripts/send-newsletter.mjs` with `BUTTONDOWN_API_KEY: ${{ secrets.BUTTONDOWN_API_KEY }}` and `DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}`.
-  - job `report`: copy the `report` job from `.github/workflows/site-health.yml`, with `needs: send`, `if: ${{ failure() }}`, and title `Newsletter send failed`.
-  - Header comment (one line, ≤ 140 chars): no Netlify token, hook or push; reads `rss.xml` only.
-
-- [ ] **Step 2: Verify** — `actionlint .github/workflows/newsletter.yml` → no output; the commit's zizmor hook passes.
+- [ ] **Step 2: Verify** — `actionlint .github/workflows/newsletter.yml` prints nothing.
 
 - [ ] **Step 3: Commit** — message `ci(newsletter): run the sender after deploys and daily`, footer `Advances #105`.
 
 ---
 
-### Task 4: Signup function
+### Task 3: Signup function
 
 **Files:**
 
-- Create: `scripts/subscribe-submission.mjs` (logic, testable as plain JS)
-- Create: `netlify/functions/submission-created.mts` (thin v2 wrapper)
-- Test: `test/subscribe-submission.test.mjs`
+- Create: `netlify/functions/submission-created.mts`
+- Test: `test/submission-created.test.mjs`
 
 **Interfaces:**
 
-- Consumes: `createButtondownClient`, `client.createSubscriber` (Task 1).
-- Produces:
-  - `redactEmail(email: string) => string` — `"andrew@example.com"` → `"a***@example.com"`.
-  - `handleSubmission(payload, { client, log }) => Promise<"ignored" | "created" | "exists">`
+- Produces (exported for tests): `addSubscriber({ email, ipAddress, apiKey, fetch }) => Promise<"created" | "exists">` — the only Buttondown-specific code; a provider change replaces this function and the env var.
 
-- [ ] **Step 1: Write the failing tests**:
-  - `payload.form_name !== "subscribe"` → `"ignored"`, `createSubscriber` not called.
-  - missing or invalid `payload.data.email` → throws `Error` whose message does not contain the input.
-  - `" Andrew@Example.com "` → `createSubscriber` called with `email: "Andrew@Example.com"` (trimmed, case kept) (Review Focus 4).
-  - `payload.data.ip = "1.2.3.4"` → `ipAddress: "1.2.3.4"` passed; absent → `ipAddress` undefined.
-  - client returns `"exists"` → resolves `"exists"`.
-  - client rejects → `handleSubmission` rejects.
-  - every string passed to `log` contains `a***@example.com`-style redaction and never the full address or the IP.
+- [ ] **Step 1: Write the failing tests** (import the `.mts` directly; Node 24 strips types. If it refuses, move `addSubscriber` to `scripts/add-subscriber.mjs` and import that):
+  - `addSubscriber` POSTs `/subscribers` with `{ email_address: "a@b.co" }`, plus `ip_address` only when given; 201 → `"created"`; 400 → `"exists"`; 500 → rejects with a message that has the status and not the address.
+  - the default handler, given a request whose `payload.form_name` is not `"subscribe"`, makes no fetch; given `" a@b.co "`, calls Buttondown with `"a@b.co"` (Review Focus 5); nothing it logs contains the full address or the IP.
 
-- [ ] **Step 2: Run, expect FAIL** — `node --test test/subscribe-submission.test.mjs`.
+- [ ] **Step 2: Run, expect FAIL** — `node --test test/submission-created.test.mjs`.
 
-- [ ] **Step 3: Implement** `scripts/subscribe-submission.mjs`, then `netlify/functions/submission-created.mts`: `export default async (req: Request) => { const { payload } = await req.json(); await handleSubmission(payload, { client: createButtondownClient({ apiKey: Netlify.env.get("BUTTONDOWN_API_KEY") ?? "" }), log: console.log }); return new Response("ok"); }`. Errors propagate so Netlify records a failure. No `config.path` (event function). Import from `../../scripts/…` as `scheduled-rebuild.mts` does.
+- [ ] **Step 3: Implement.** Default export: read `payload`, ignore other forms, trim and roughly validate `payload.data.email`, call `addSubscriber` with `payload.data.ip` if present and `Netlify.env.get("BUTTONDOWN_API_KEY")`, log the outcome with a redacted address (`a***@b.co`), return `new Response("ok")`. Errors propagate so Netlify marks the run failed. No `config.path`. The handler reads the API key at call time, so tests can stub a global `Netlify.env.get`.
 
-- [ ] **Step 4: Run, expect PASS** — `npm test`, then `npm run check` (tsc) → no errors.
+- [ ] **Step 4: Run, expect PASS** — `npm test`, then `npm run check`.
 
-- [ ] **Step 5: Commit** — the three files; message `feat(newsletter): add subscribers from the Netlify form`, footer `Advances #105`.
+- [ ] **Step 5: Commit** — message `feat(newsletter): add subscribers from the Netlify form`, footer `Advances #105`.
 
 ---
 
-### Task 5: Pages, links and checks
+### Task 4: Pages, links and checks
 
 **Files:**
 
 - Create: `src/pages/subscribe.astro`, `src/pages/subscribe/thanks.astro`
 - Modify: `src/layouts/BaseLayout.astro` (footer), `src/layouts/PostLayout.astro` (after `.prose`)
-- Modify: `scripts/verify-build-output.sh` (form contract), `scripts/verify-deploy-preview.sh` (`ROUTES`), `scripts/verify-live-content.sh` (`HEADINGS` and its route loop)
-- Modify: `test/verify-live-content.test.mjs` (`goodSite()` gains `/subscribe/`)
+- Modify: `scripts/verify-build-output.sh`, `scripts/verify-deploy-preview.sh`, `scripts/verify-live-content.sh`, `test/verify-live-content.test.mjs`
 
-- [ ] **Step 1: Draft the copy** for both pages, the footer link ("Subscribe"), and the post link ("Get new posts by email"). `/subscribe` says: an email when a new post goes up, nothing else; Buttondown handles it; unsubscribe any time; RSS link as the alternative. `<h1>Subscribe</h1>` and `<h1>Check your inbox</h1>`. Run `personify`, then the `docs/VOICE.md` checks.
+- [ ] **Step 1: Draft the copy**: `<h1>Subscribe</h1>` page (an email when a new post goes up, nothing else; Buttondown sends it; unsubscribe any time; RSS link as the alternative), `<h1>Check your inbox</h1>` thanks page, footer link "Subscribe", post link "Get new posts by email". Run `personify`, then the `docs/VOICE.md` checks.
 
-- [ ] **Step 2: Build the pages.** Form markup, exact attributes: `<form name="subscribe" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/subscribe/thanks/">`, a `hidden` honeypot `<input name="bot-field">`, `<label for="email">` plus `<input type="email" id="email" name="email" required autocomplete="email">`, a submit button. Style with existing `global.css` variables. The post link renders only when `collection === 'blog'`.
+- [ ] **Step 2: Build the pages.** Exact form: `<form name="subscribe" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/subscribe/thanks/">` with a `hidden` `<input name="bot-field">`, a labelled `<input type="email" id="email" name="email" required autocomplete="email">`, and a submit button. Existing `global.css` variables only. The post link renders only when `collection === 'blog'`.
 
-- [ ] **Step 3: Add the form contract check** to `verify-build-output.sh` as a new numbered check on `dist/subscribe/index.html`: it must contain `data-netlify="true"`, `name="subscribe"`, `name="email"` and `name="bot-field"`. Each missing item is a `fail`.
+- [ ] **Step 3: Checks.** In `verify-build-output.sh`, a new check that `dist/subscribe/index.html` contains `data-netlify="true"`, `name="subscribe"`, `name="email"` and `name="bot-field"`. Add `/subscribe/` to `ROUTES` in `verify-deploy-preview.sh`, and to both the `HEADINGS` map and route loop in `verify-live-content.sh`, and to `goodSite()` in its test.
 
-- [ ] **Step 4: Add `/subscribe/`** to `ROUTES` in `verify-deploy-preview.sh`, and `["/subscribe/"]="Subscribe"` plus the route-loop entry in `verify-live-content.sh`; add the page to `goodSite()` in the test.
-
-- [ ] **Step 5: Verify** —
+- [ ] **Step 4: Verify.**
   - `npm run build > "$TMPDIR/build.log" 2>&1 && scripts/verify-build-output.sh "$TMPDIR/build.log"` → `Build output verification passed.`
-  - Known-bad: temporarily delete `data-netlify="true"` from `dist/subscribe/index.html`, re-run the check → it fails naming that attribute; rebuild.
-  - `grep -L "Get new posts by email" dist/blog/ouatrevisit/*/index.html | wc -l` equals the ouatrevisit page count (link absent on every siloed post); `grep -l` finds it on `dist/blog/five-races/index.html`.
-  - `npm test`, `shellcheck -S info` on the three scripts → clean.
+  - Known-bad: remove `data-netlify="true"` from `dist/subscribe/index.html`, re-run → fails naming it; rebuild.
+  - The post link appears in `dist/blog/five-races/index.html` and in no `dist/blog/ouatrevisit/*/index.html` or `dist/blog/elections/*/index.html`.
+  - `npm test` passes; `shellcheck -S info` on the three scripts is clean.
 
-- [ ] **Step 6: Commit** — the files above; message `feat(newsletter): add the subscribe page and links`, footer `Advances #105`. The text gate opens the copy for Andrew's approval.
+- [ ] **Step 5: Commit** — message `feat(newsletter): add the subscribe page and links`, footer `Advances #105`. The text gate opens the copy for Andrew.
 
 ---
 
-### Task 6: Launch configuration and PR
+### Task 5: Launch configuration and PR
 
 **Files:**
 
 - Modify: `scripts/send-newsletter.mjs` (`LAUNCH_DATE`)
 
-- [ ] **Step 1: Set `LAUNCH_DATE`** to the date the PR will merge (ask Andrew if it is not today). Run `npm test`; commit `chore(newsletter): set the launch date`, footer `Advances #105`.
+- [ ] **Step 1:** Set `LAUNCH_DATE` to the merge date (ask Andrew if not today). `npm test`. Commit `chore(newsletter): set the launch date`, footer `Advances #105`.
 
-- [ ] **Step 2: Set the Netlify env var** before merge, so the merge deploy picks it up and no extra deploy is needed: `netlify env:set BUTTONDOWN_API_KEY "$(op read 'op://Automation/Buttondown API/credential')" --scope functions >/dev/null` (check `netlify env:set --help` lists `--scope` first) — never print the value. Confirm with `netlify env:list --json | jq -r 'keys[]' | grep -c BUTTONDOWN_API_KEY` → `1`.
+- [ ] **Step 2:** Before merge, set the Netlify env var so the merge deploy picks it up: check `netlify env:set --help` lists `--scope`, then `netlify env:set BUTTONDOWN_API_KEY "$(op read 'op://Automation/Buttondown API/credential')" --scope functions >/dev/null`. Confirm with `netlify env:list --json | jq -r 'keys[]' | grep -c BUTTONDOWN_API_KEY` → `1`. Never print the value.
 
-- [ ] **Step 3: Push and open the PR** (`Closes #105` in the PR body only, not in commits). Watch CI with `post-push-status.sh`; the deploy preview must pass `netlify-site-checks` with `/subscribe/` included.
+- [ ] **Step 3:** Push, open the PR with `Closes #105` in the PR body only, and watch CI with `post-push-status.sh`. The deploy preview must pass `netlify-site-checks` with `/subscribe/` included.
 
-- [ ] **Step 4: After Andrew merges — manual launch checks** (report each result to Andrew):
-  1. Andrew turns off the Buttondown public archive and says whether the setting exists on the free tier.
-  2. Andrew subscribes on the live `/subscribe/` and confirms the email arrives and the confirmation link works; check `netlify logs --source functions --function submission-created --since 30m` shows `created` with a redacted address.
-  3. Run `gh workflow run newsletter.yml -f dry_run=true` and read the log: it should say `nothing-new` (no post after launch yet).
-  4. Check whether Buttondown documents a "send test email" endpoint; if yes, propose using it before the first real post; if no, the first post after launch is the first real send.
+- [ ] **Step 4: After Andrew merges**, report each result:
+  1. Andrew turns off the Buttondown public archive and says whether the free tier has that setting.
+  2. Andrew subscribes on the live `/subscribe/` and confirms the email and link work; `netlify logs --source functions --function submission-created --since 30m` shows `created` with a redacted address.
+  3. `gh workflow run newsletter.yml -f dry_run=true`; the log says `nothing-new`.
+  4. If Buttondown documents a "send test email" endpoint, propose it before the first real post; otherwise the first post after launch is the first real send.
