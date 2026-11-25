@@ -38,10 +38,6 @@ jobs:
         id: content
         # Run even when the first step fails, so one report shows everything.
         if: ${{ !cancelled() }}
-        env:
-          # strava: 502 until the OAuth scope is fixed (#174). Remove it from
-          # this list when that issue closes; the script warns once it passes.
-          KNOWN_FAILURES: strava
         run: scripts/verify-live-content.sh "${SITE_URL}"
 
   report:

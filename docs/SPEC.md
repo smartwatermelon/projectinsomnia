@@ -173,8 +173,9 @@ Repo names rendered in `var(--font-mono)` for visual distinction.
 
 ### /now page
 
-Complete. Three sections: GitHub (contribution graph + activity), Strava,
-Instagram. All feeds are lazy-loaded client-side so third-party resources
+Complete. Two sections: GitHub (contribution graph + activity) and
+Instagram. A Strava section was removed in November 2026 when Strava made
+API access subscriber-only. All feeds are lazy-loaded client-side so third-party resources
 don't block page render. Rolling ~24hr window; extends automatically during
 slow periods. Links to full profiles for each service.
 

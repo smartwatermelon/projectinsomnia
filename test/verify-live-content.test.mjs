@@ -30,7 +30,6 @@ function goodSite() {
     "/now/": html(nowHtml()),
     "/4338ca/twistedmelonman": { status: 200, type: "image/svg+xml", body: "<svg/>" },
     "/api/github-feed": json({ items: [{ title: "pushed repo", link: "https://github.com/x/y" }] }),
-    "/api/strava-feed": json({ items: [{ name: "Run" }] }),
     "/api/instagram-feed": json({ posts: [{ imageUrl: "/api/instagram-image/abc", postUrl: "https://instagr.am/p/abc/" }] }),
     "/api/instagram-image/abc": { status: 200, type: "image/jpeg", body: "jpeg" },
   };
@@ -132,20 +131,26 @@ test("fails when the first Instagram image is not served", async () => {
   assert.match(output, /\/api\/instagram-image\/abc returned HTTP 404/);
 });
 
-test("a Strava 502 fails the run unless Strava is a known failure", async () => {
+test("a feed 502 fails the run unless that feed is a known failure", async () => {
   const site = goodSite();
-  site["/api/strava-feed"] = json({ items: [] }, 502);
+  site["/api/github-feed"] = json({ items: [] }, 502);
   const strict = await run(site);
   assert.equal(strict.code, 1, strict.output);
-  const known = await run(site, { KNOWN_FAILURES: "strava" });
+  const known = await run(site, { KNOWN_FAILURES: "github" });
   assert.equal(known.code, 0, known.output);
   assert.match(known.output, /known failure, not counted/);
 });
 
 test("warns when a known failure starts passing", async () => {
-  const { code, output } = await run(goodSite(), { KNOWN_FAILURES: "strava" });
+  const { code, output } = await run(goodSite(), { KNOWN_FAILURES: "github" });
   assert.equal(code, 0, output);
-  assert.match(output, /strava feed now passes; remove it from KNOWN_FAILURES/);
+  assert.match(output, /github feed now passes; remove it from KNOWN_FAILURES/);
+});
+
+test("does not request the removed Strava feed", async () => {
+  const { code, output, requests } = await run(goodSite());
+  assert.equal(code, 0, output);
+  assert.ok(!requests.some((r) => r.includes("strava")), requests.join("\n"));
 });
 
 test("does not follow a redirect toward /.netlify/", async () => {

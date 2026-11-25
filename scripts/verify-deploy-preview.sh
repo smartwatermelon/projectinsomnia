@@ -115,7 +115,7 @@ else
   # graph's alt text and the "View full GitHub profile" link, so it would
   # pass even if the heading itself disappeared.
   missing_sections=""
-  for section in GitHub Strava Instagram; do
+  for section in GitHub Instagram; do
     if ! printf '%s' "${NOW_BODY}" \
       | grep -qE "<h2[^>]*class=\"feed-heading\"[^>]*>${section}</h2>"; then
       missing_sections="${missing_sections} ${section}"
