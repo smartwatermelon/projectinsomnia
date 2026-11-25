@@ -45,7 +45,9 @@ async function run(routes, env = {}, baseSuffix = "") {
       res.writeHead(404).end();
       return;
     }
-    res.writeHead(route.status, { "content-type": route.type }).end(route.body);
+    const headers = { "content-type": route.type };
+    if (route.location) headers.location = route.location;
+    res.writeHead(route.status, headers).end(route.body);
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const base = `http://127.0.0.1:${server.address().port}`;
@@ -144,6 +146,16 @@ test("warns when a known failure starts passing", async () => {
   const { code, output } = await run(goodSite(), { KNOWN_FAILURES: "strava" });
   assert.equal(code, 0, output);
   assert.match(output, /strava feed now passes; remove it from KNOWN_FAILURES/);
+});
+
+test("does not follow a redirect toward /.netlify/", async () => {
+  const site = goodSite();
+  site["/api/github-feed"] = { status: 302, type: "text/plain", body: "", location: "/.netlify/functions/scheduled-rebuild" };
+  site["/.netlify/functions/scheduled-rebuild"] = json({ items: [{ title: "x", link: "https://github.com/x" }] });
+  const { code, output, requests } = await run(site);
+  assert.equal(code, 1, output);
+  assert.match(output, /github feed returned HTTP 302/);
+  assert.ok(!requests.some((r) => r.includes("/.netlify/")), requests.join("\n"));
 });
 
 test("refuses /.netlify/ URLs before sending any request", async () => {

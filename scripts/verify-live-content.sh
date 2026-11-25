@@ -48,12 +48,12 @@ guard_path() {
 }
 
 # GET one URL. Prints "<status> <content-type>" on line 1, then the body.
-# No retries: a retried 5xx is another billed function invocation.
+# No retries (each is a billed invocation) and no redirects (a hop could reach /.netlify/).
 get() {
   guard_path "$1"
   local tmp status
   tmp=$(mktemp)
-  status=$(curl -sS --location --max-time 20 -o "${tmp}" \
+  status=$(curl -sS --max-time 20 -o "${tmp}" \
     -w "%{http_code} %{content_type}" "$1" 2>/dev/null || echo "000 none")
   printf '%s\n' "${status}"
   cat "${tmp}"
@@ -64,7 +64,7 @@ get() {
 # in a shell variable.
 get_head() {
   guard_path "$1"
-  curl -sS --location --max-time 20 -o /dev/null \
+  curl -sS --max-time 20 -o /dev/null \
     -w "%{http_code} %{content_type}" "$1" 2>/dev/null || echo "000 none"
 }
 
