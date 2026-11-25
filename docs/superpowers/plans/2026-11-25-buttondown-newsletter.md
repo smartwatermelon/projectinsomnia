@@ -79,15 +79,15 @@
 - Create: `.github/workflows/newsletter.yml`
 
 - [ ] **Step 1: Write the workflow.**
-  - Triggers: `workflow_run` of `"Netlify Site Checks"` (`types: [completed]`, `branches: [main]`); `schedule: '47 13 * * *'`; `workflow_dispatch` with boolean input `dry_run`, default `true`.
+  - Triggers: `schedule: '47 13 * * *'`; `workflow_dispatch` with boolean input `dry_run`, default `true`. No `workflow_run` (zizmor `dangerous-triggers`; schedule-only chosen 2026-11-25).
   - `permissions: {}`; `concurrency: { group: newsletter, cancel-in-progress: false }`.
-  - Job `send` (`permissions: contents: read`): runs for `schedule` and `workflow_dispatch`, and for `workflow_run` only when its `conclusion == 'success'` and `event == 'push'`. Steps: checkout and setup-node pinned exactly as in `build.yml`, `npm ci`, `node scripts/send-newsletter.mjs` with `BUTTONDOWN_API_KEY` from secrets and `DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}`.
+  - Job `send` (`permissions: contents: read`): runs for every trigger (no `if`). Steps: checkout and setup-node pinned exactly as in `build.yml`, `npm ci`, `node scripts/send-newsletter.mjs` with `BUTTONDOWN_API_KEY` from secrets and `DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run && '1' || '' }}`.
   - Job `report`: the `report` job from `site-health.yml`, `needs: send`, title `Newsletter send failed`.
   - One-line header comment: no Netlify token, hook or push; reads `rss.xml` only.
 
 - [ ] **Step 2: Verify** — `actionlint .github/workflows/newsletter.yml` prints nothing.
 
-- [ ] **Step 3: Commit** — message `ci(newsletter): run the sender after deploys and daily`, footer `Advances #105`.
+- [ ] **Step 3: Commit** — message `ci(newsletter): run the sender daily`, footer `Advances #105`.
 
 ---
 

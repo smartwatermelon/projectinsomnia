@@ -143,11 +143,12 @@ the next run finds the URL in step 4 and skips the post.
 ### `.github/workflows/newsletter.yml`
 
 - Triggers:
-  - `workflow_run` of "Netlify Site Checks", completed, conclusion
-    success, branch `main`, event `push` (a post merged with a past
-    date goes out after the production deploy is verified).
   - `schedule`, daily about 45 minutes after the 13:00 UTC
-    scheduled rebuild (future-dated posts).
+    scheduled rebuild. This covers future-dated posts and posts
+    merged with a past date; the latter go out at the next run.
+    There is no `workflow_run` trigger: zizmor flags it as
+    `dangerous-triggers`, and Andrew chose schedule-only on
+    2026-11-25 over an inline ignore.
   - `workflow_dispatch` with a `dry_run` input, default `true`.
 - `concurrency: { group: newsletter, cancel-in-progress: false }`, so
   two runs never send at once.
