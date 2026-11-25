@@ -154,6 +154,9 @@ test("normal path sends exactly one email with the send-now status", async () =>
   const [request] = posts(f);
   assert.equal(request.url, "https://api.buttondown.com/v1/emails");
   assert.equal(request.options.headers.Authorization, "Token key");
+  assert.equal(request.options.headers["X-Buttondown-Live-Dangerously"], "true");
+  const gets = f.requests.filter((r) => r.options.method !== "POST");
+  assert.ok(gets.every((r) => !r.options.headers?.["X-Buttondown-Live-Dangerously"]));
   assert.deepEqual(JSON.parse(request.options.body), {
     subject: "Post a",
     body: "About a\n\n[Read it on projectinsomnia.com](https://projectinsomnia.com/blog/a/)\n",

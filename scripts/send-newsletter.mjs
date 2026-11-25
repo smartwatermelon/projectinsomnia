@@ -88,7 +88,12 @@ export async function run({ env, fetch, log, now }) {
 
     const response = await fetch(`${API}/emails`, {
       method: "POST",
-      headers: { ...headers, "Content-Type": "application/json" },
+      headers: {
+        ...headers,
+        "Content-Type": "application/json",
+        // Docs: about_to_send on API 2026-04-01+ needs this header on first use.
+        "X-Buttondown-Live-Dangerously": "true",
+      },
       body: JSON.stringify({ ...email, status: SEND_NOW_STATUS }),
       signal: AbortSignal.timeout(20000),
     });
