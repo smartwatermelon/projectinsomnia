@@ -33,23 +33,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </a>
         </p>
       </section>
-
-      <section class="feed-section">
-        <h2 class="feed-heading">Strava</h2>
-
-        <details open class="activity-details">
-          <summary class="activity-summary">Recent activities</summary>
-          <div id="strava-feed">
-            <p class="muted">Loading…</p>
-          </div>
-        </details>
-
-        <p class="profile-link">
-          <a href="https://www.strava.com/athletes/133350" target="_blank" rel="noopener noreferrer">
-            View Strava profile →
-          </a>
-        </p>
-      </section>
     </div>
 
     <div class="now-right">
@@ -122,47 +105,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         span.textContent = relativeTime(item.published);
 
         li.append(a, span);
-        ul.appendChild(li);
-      }
-      el.replaceChildren(ul);
-    } catch {
-      showMessage(el, 'Activity feed unavailable.');
-    }
-  })();
-
-  // --- Strava feed ---
-  (async () => {
-    const el = document.getElementById('strava-feed')!;
-    try {
-      const res = await timedFetch('/api/strava-feed');
-      if (!res.ok) throw new Error(`${res.status}`);
-      const { items } = await res.json() as {
-        items: Array<{ name: string; type: string; startDate: string; link: string }>;
-      };
-      if (!items?.length) { showMessage(el, 'No recent activities.'); return; }
-
-      const ul = document.createElement('ul');
-      ul.className = 'event-list';
-      for (const item of items) {
-        const li = document.createElement('li');
-        li.className = 'event';
-
-        const a = document.createElement('a');
-        a.href = item.link;
-        a.target = '_blank';
-        a.rel = 'noopener noreferrer';
-        a.className = 'event-title';
-        a.textContent = item.name;
-
-        const type = document.createElement('span');
-        type.className = 'event-type';
-        type.textContent = item.type.replace(/([A-Z])/g, ' $1').trim();
-
-        const time = document.createElement('span');
-        time.className = 'event-time';
-        time.textContent = relativeTime(item.startDate);
-
-        li.append(a, type, time);
         ul.appendChild(li);
       }
       el.replaceChildren(ul);
@@ -312,13 +254,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   :global(.event-title:hover) {
     color: var(--color-accent);
-  }
-
-  :global(.event-type) {
-    font-size: 0.8rem;
-    color: var(--color-muted);
-    white-space: nowrap;
-    flex-shrink: 0;
   }
 
   :global(.event-time) {

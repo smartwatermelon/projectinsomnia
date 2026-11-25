@@ -130,7 +130,7 @@ else
   fail "contribution graph returned HTTP ${chart_code} ${chart_type}, expected 200 image/svg+xml"
 fi
 
-# Check 3: feeds have items. github/strava use {items}, instagram {posts}.
+# Check 3: feeds have items. github uses {items}, instagram {posts}.
 # feed_check <name> <jq filter that must be true>
 feed_check() {
   local name="$1" filter="$2" resp code body report
@@ -157,7 +157,6 @@ feed_check() {
 
 FEED_BODY=""
 feed_check github '(.items | length > 0) and all(.items[]; (.title | type == "string") and (.link | startswith("https://github.com/")))'
-feed_check strava '(.items | length > 0)'
 feed_check instagram '(.posts | length > 0) and all(.posts[]; (.imageUrl | type == "string") and (.postUrl | type == "string"))'
 INSTAGRAM_BODY="${FEED_BODY}"
 

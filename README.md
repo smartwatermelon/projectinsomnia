@@ -20,19 +20,21 @@ Built with [Astro 5](https://astro.build), hosted on [Netlify](https://netlify.c
 | :---- | :---------- |
 | `/` | Homepage with recent posts |
 | `/blog/` | Full post archive |
-| `/now/` | Live feed: GitHub activity, Strava, Instagram |
+| `/now/` | Live feed: GitHub activity, Instagram |
 | `/projects/` | Apps, client work, and open source repos |
 | `/about/` | About page |
 
 ## /now page feeds
 
-The /now page lazy-loads three live feeds via Netlify on-demand functions:
+The /now page lazy-loads two live feeds via Netlify on-demand functions:
 
 | Feed | Function | Source |
 | :--- | :------- | :----- |
 | GitHub | `/api/github-feed` | Public Atom feed |
-| Strava | `/api/strava-feed` | Strava API v3 (OAuth 2.0) |
 | Instagram | `/api/instagram-feed` | IFTTT webhook → Netlify Blobs |
+
+A Strava feed was removed in November 2026, when Strava made API access
+subscriber-only.
 
 Instagram posts are pushed via IFTTT Maker Webhooks to `/api/instagram-webhook` and stored in Netlify Blobs.
 
@@ -42,9 +44,6 @@ Set in Netlify dashboard (not committed):
 
 | Variable | Used by |
 | :------- | :------ |
-| `STRAVA_CLIENT_ID` | strava-feed function |
-| `STRAVA_CLIENT_SECRET` | strava-feed function |
-| `STRAVA_REFRESH_TOKEN` | strava-feed function |
 | `INSTAGRAM_WEBHOOK_SECRET` | instagram-webhook function |
 | `BUILD_HOOK_URL` | scheduled-rebuild function |
 
