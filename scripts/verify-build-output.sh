@@ -149,6 +149,19 @@ else
   done
 fi
 
+# --- Check 6: no link glued to a word ---
+# Astro compresses "under\n<a" to "under<a". ";" is omitted so &#32; passes.
+GLUED_PATTERN='[[:alnum:].,:]<a[ >]|</a>[[:alnum:]]'
+GLUED=$(grep -rlE --include='*.html' "${GLUED_PATTERN}" "${DIST}" || true)
+if [[ -n "${GLUED}" ]]; then
+  fail "link with no space next to the word beside it (put that word on the link's source line):"
+  while IFS= read -r file; do
+    grep -oE ".{0,30}(${GLUED_PATTERN}).{0,20}" "${file}" | sed "s|^|     ${file}: |"
+  done <<<"${GLUED}"
+else
+  pass "no links are glued to neighbouring words"
+fi
+
 echo
 if [[ "${FAILURES}" -gt 0 ]]; then
   echo "Build output verification FAILED (${FAILURES} problem(s))."
