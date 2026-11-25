@@ -5,6 +5,8 @@
 const API = "https://api.buttondown.com/v1";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const DUPLICATE_CODES = new Set(["email_already_exists", "subscriber_already_exists"]);
+
 type Fetch = typeof fetch;
 
 export async function addSubscriber({
@@ -31,9 +33,18 @@ export async function addSubscriber({
     signal: AbortSignal.timeout(20000),
   });
   if (response.status === 201) return "created";
-  // Buttondown answers 400 for an address it already holds.
-  if (response.status === 400) return "exists";
-  throw new Error(`Buttondown subscriber request failed: HTTP ${response.status}`);
+  // Use the error code only: `detail` may contain the address.
+  let code = "";
+  try {
+    const body = await response.json();
+    if (typeof body?.code === "string") code = body.code;
+  } catch {
+    // body is not JSON; report the status alone
+  }
+  if (response.status === 400 && DUPLICATE_CODES.has(code)) return "exists";
+  throw new Error(
+    `Buttondown subscriber request failed: HTTP ${response.status}${code ? ` ${code}` : ""}`,
+  );
 }
 
 function redact(email: string): string {
@@ -54,7 +65,7 @@ export default async function handler(req: Request): Promise<Response> {
   const apiKey = Netlify.env.get("BUTTONDOWN_API_KEY");
   if (!apiKey) throw new Error("BUTTONDOWN_API_KEY is not set");
 
-  const outcome = await addSubscriber({ email, ipAddress: payload.ip || undefined, apiKey });
+  const outcome = await addSubscriber({ email, ipAddress: payload.data?.ip || undefined, apiKey });
   console.log(`subscribe: ${outcome} ${redact(email)}`);
   return new Response("ok");
 }
