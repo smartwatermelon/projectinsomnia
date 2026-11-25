@@ -32,6 +32,11 @@ jobs:
         # wait on TypeScript 7.1 and @astrojs/ts-content-mapper.
         run: npm run check
 
+      - name: Unit tests
+        # node --test over test/. Includes the stub-server tests for
+        # scripts/verify-live-content.sh, which need bash and jq.
+        run: npm test
+
       - name: Build site
         # Tee so the log can be inspected for warnings that do not affect
         # the exit code. pipefail is on by default in GitHub's bash shell,
